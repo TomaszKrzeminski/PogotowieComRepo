@@ -1,0 +1,11 @@
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\bin\Debug\netcoreapp2.0\PogotowieCom.deps.json
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\bin\Debug\netcoreapp2.0\PogotowieCom.runtimeconfig.json
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\bin\Debug\netcoreapp2.0\PogotowieCom.runtimeconfig.dev.json
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\bin\Debug\netcoreapp2.0\PogotowieCom.dll
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\bin\Debug\netcoreapp2.0\PogotowieCom.pdb
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\obj\Debug\netcoreapp2.0\PogotowieCom.csprojAssemblyReference.cache
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\obj\Debug\netcoreapp2.0\PogotowieCom.csproj.CoreCompileInputs.cache
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\obj\Debug\netcoreapp2.0\PogotowieCom.AssemblyInfoInputs.cache
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\obj\Debug\netcoreapp2.0\PogotowieCom.AssemblyInfo.cs
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\obj\Debug\netcoreapp2.0\PogotowieCom.dll
+C:\Users\tomek\Desktop\PogotowieCom\PogotowieCom\PogotowieCom\obj\Debug\netcoreapp2.0\PogotowieCom.pdb
