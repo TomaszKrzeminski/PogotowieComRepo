@@ -1,0 +1,14 @@
+﻿@model Dictionary<string,object>
+@{
+    ViewData["Title"] = "ShowUsers";
+    Layout = "_Layout";
+}
+
+<h2>ShowUsers</h2>
+<div class="bg-primary m-1 p-1 text-white"><h4>Informacje o użytkowniku</h4></div>
+<table class="table table-sm table -borded m-1 p-1">
+    @foreach (var item in Model)
+    {
+        <tr><th>@item.Key</th><td>@item.Value</td></tr>
+    }
+</table>

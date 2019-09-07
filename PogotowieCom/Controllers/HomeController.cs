@@ -18,11 +18,11 @@ namespace PogotowieCom.Controllers
             repository = repo;
         }
 
-
-
-        public IActionResult Index()
+        public ViewResult HomePage()
         {
             return View();
         }
+
+       
     }
 }

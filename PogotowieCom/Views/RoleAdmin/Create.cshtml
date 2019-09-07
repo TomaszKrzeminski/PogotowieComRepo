@@ -1,0 +1,19 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Create</h2>
+
+<div class="bg-primary m-1 p-1"><h4>Role</h4></div>
+<div class="text-danger" asp-validation-summary="All"></div>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="name">Nazwa roli</label>
+        <input name="name" class="form-control" />
+    </div>
+  <button type="submit" class="btn btn-primary">Utwórz</button>
+    <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+</form>

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PogotowieCom.Models;
+using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace PogotowieCom
 {
@@ -28,7 +29,10 @@ namespace PogotowieCom
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<IRepository, AppRepository>();
-            services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddTransient<AppIdentityDbContext>();
+            services.AddDbContext<AppIdentityDbContext>(options =>
+                 options.UseSqlServer(
+                     Configuration["Data:PogotowieCom:ConnectionString"]));
 
 
             services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppIdentityDbContext>().AddDefaultTokenProviders();
@@ -36,17 +40,19 @@ namespace PogotowieCom
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppIdentityDbContext context)
         {
             app.UseDeveloperExceptionPage();
             app.UseStatusCodePages();
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseMvc(routes => {
-                routes.MapRoute(name: "default", template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(name: "default", template: "{controller=Home}/{action=HomePage}/{id?}");
 
 
             });
+
+            SeedAdmin.EnsurePopulated(context);
         }
     }
 }
