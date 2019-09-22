@@ -1,0 +1,139 @@
+﻿@model SelectPlaceViewModel
+
+@{
+    ViewData["Title"] = "ChoosePlace";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="container">
+    <div class="row text-center">
+        <div class="col-lg-12">
+            <h2>Wybierz Miejsce Wizyty</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <form id="SelectPlace" asp-action="ShowPlaces" asp-controller="Appointment">
+                <div class="row">
+                    <div class="col-lg-4 form-group ">
+                        <div><span asp-validation-for="Country" class="text-danger"></span></div>
+                        <lable>Kraj</lable>
+                        <input name="Country" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 form-group ">
+                        <div><span asp-validation-for="City" class="text-danger"></span></div>
+                        <lable>Miasto</lable>
+                        <input name="City" class="form-control">
+                    </div>
+                </div><div class="row">
+                    <div class="col-lg-4 form-group ">
+                        <div><span asp-validation-for="Street" class="text-danger"></span></div>
+                        <lable>Ulica</lable>
+                        <input name="Street" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 form-group ">
+                        <div><span asp-validation-for="BuildingNumber" class="text-danger"></span></div>
+                        <lable>Numer Budynku</lable>
+                        <input name="BuildingNumber" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 form-group ">
+                        <div><span asp-validation-for="Room" class="text-danger"></span></div>
+                        <lable>Pokój</lable>
+                        <input name="Room" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 form-group ">
+                        <button type="submit" id="Search">Szukaj</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <div class="row">
+                <div class="col-lg-4 form-group ">
+                    <a class="btn btn-primary" asp-action="AddPlace">Dodaj Miejsce</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div id="SelectResult" class="col-lg-12">
+            <h2>Brak Wyników</h2>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+@section Scripts
+    {
+
+
+
+
+
+    @*<script>
+       
+            if ($(this).valid()) {
+                $.ajax({
+                    data: $(this).serialize(),
+                    type: $(this).attr('method'),
+                    url: $(this).attr('action'),
+                    success: function (result) {
+                        $("#SelectResult").html(result);
+                    }
+                }); 
+            }
+       
+
+    </script>*@
+
+        <script type="text/javascript">
+
+            var frm = $('#SelectPlace');
+
+            frm.submit(function (e) {
+
+                e.preventDefault();
+
+                $.ajax({
+                    type: frm.attr('method'),
+                    url: frm.attr('action'),
+                    data: frm.serialize(),
+                    success: function (data) {
+                        $("#SelectResult").html(data);
+                        alert("Submit");
+                    },
+                    error: function (data) {
+                        console.log('An error occurred.');
+                        console.log(data);
+                        alert("Error");
+                    },
+                });
+            });
+
+
+        </script>
+
+       
+
+
+} 
+                    

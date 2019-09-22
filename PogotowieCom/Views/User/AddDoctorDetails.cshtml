@@ -1,0 +1,35 @@
+﻿@model DoctorDetailsViewModel
+@{
+    ViewData["Title"] = "AddDoctorDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Wybierz specializacje</h2>
+<div class="container">
+    <form asp-action="AddDoctorDetails" asp-controller="User">
+        <div class="row">
+            <div class="col-lg-4 form-group ">
+
+                @if (Model.SpecializationList != null)
+                {
+                    <select class="form-control" asp-for="Specialization.Name">
+                        @foreach (var specialist in Model.SpecializationList)
+                        {
+                            <option>@specialist.Name</option>
+                        }
+                    </select>
+                }
+
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 form-group ">
+                <input asp-for="DoctorId" type="hidden" />
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit">Wybierz</button>
+        </div>
+    </form>
+</div>

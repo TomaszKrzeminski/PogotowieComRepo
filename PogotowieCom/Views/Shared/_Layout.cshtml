@@ -5,9 +5,14 @@
 
 
     <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+
+    <script src="~/lib/jquery-validate/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
 
     <script src="~/datepicker-pl.js"></script>
 
@@ -32,18 +37,26 @@
                 {
 
                     <a class="nav-item nav-link" @*style="color:white" *@ asp-action="UsersPanel" asp-controller="Home"> @User.Identity.Name </a>
-                    <a class="nav-item nav-link" asp-action="LogOut" asp-controller="User">Log Out </a>
-
-                    
+                    <a class="nav-item nav-link" asp-action="LogOut" asp-controller="User">Wyloguj się </a>
+                    <a class="nav-item nav-link" asp-action="Settings" asp-controller="User">Ustawienia </a>
+                    <a class="nav-item nav-link" asp-action="ManageAppointments" asp-controller="Appointment">Wizyty </a>
+                    <br />
+                    <div>
+                        @await Component.InvokeAsync("ShowSpecialization")
+                    </div>
 
 
 
                 }
                 else
                 {
-                    <a class="nav-item nav-link" asp-action="Login" asp-controller="User">Log In</a>
-                    <a class="nav-item nav-link" asp-action="Create" asp-controller="User">Reqister </a>
+                    <a class="nav-item nav-link" asp-action="Login" asp-controller="User">Logowanie</a>
+                    <a class="nav-item nav-link" asp-action="ChooseRole" asp-controller="User">Rejestracja </a>
                 }
+
+
+
+
             </div>
         </div>
     </nav>

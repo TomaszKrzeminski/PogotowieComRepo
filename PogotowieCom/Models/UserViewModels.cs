@@ -10,21 +10,24 @@ namespace PogotowieCom.Models
     public class CreateUserModel
     {
         [Required]
+        public string ChooseRole { get; set; }
+
+        [Required]
         public string Name { get; set; }
 
-        [Required]
+        //[Required]
         public string Surname { get; set; }
 
-        [Required]
+        //[Required]
         public string City { get; set; }
 
-        [Required]
+        //[Required]
         public string ZipCode { get; set; }
 
         [Required]
         public string Email { get; set; }
 
-        [Required]
+        //[Required]
         public string PhoneNumber { get; set; }
 
 
@@ -32,6 +35,15 @@ namespace PogotowieCom.Models
         public string Password { get; set; }
     }
 
+    public class CreateDoctorModel:CreateUserModel
+    {
+        public decimal PriceForVisit { get; set; }
+    }
+
+    public class CreatePatientModel:CreateUserModel
+    {
+        
+    }
 
     public class LoginModel
     {

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using PogotowieCom.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,19 +12,28 @@ namespace PogotowieCom.Models
 
     public class AppUser : IdentityUser
     {
+        public int? PatientId { get; set; }
         public virtual Patient Patient { get; set; }
+        public int? DoctorId { get; set; }
         public virtual Doctor Doctor { get; set; }
 
 
         public string Surname { get; set; }
         public string City { get; set; }
         public string ZipCode { get; set; }
+        public string ChooseRole { get; set; }
 
-      
+        public void x()
+        {
+            AppUser user = new AppUser();
+            
+        }
+
 
 
     }
 
+   
     
     
 
@@ -36,7 +47,17 @@ namespace PogotowieCom.Models
     }
 
 
-    
+    public class DoctorSpecialization
+    {
+        public int DoctorId { get; set; }
+        public Doctor Doctor { get; set; }
+
+        public int SpecializationId { get; set; }
+        public Specialization Specialization { get; set; }
+    }
+
+
+
     public class Patient 
     {
         public int PatientId { get; set; }
@@ -45,10 +66,10 @@ namespace PogotowieCom.Models
             //this.Appointments = new HashSet<Appointment>();
         }
 
-        public int NumberInQueue { get; set; }
+        public int? NumberInQueue { get; set; }
 
-
-        //public ICollection<Appointment> Appointments{ get; set; }
+        
+        public  AppUser AppUser;
         public IList<PatientAppointment> PatientAppointments { get; set; }
 
     }
@@ -58,18 +79,22 @@ namespace PogotowieCom.Models
         public int DoctorId { get; set; }
         public Doctor()
         {
-            this.Specializations = new HashSet<Specialization>();
+            
             this.Appointments = new HashSet<Appointment>();
+            this.DoctorSpecializations = new HashSet<DoctorSpecialization>();
+          
         }
                          
 
-        public decimal PriceForVisit { get; set; }
-     
+        public decimal? PriceForVisit { get; set; }
 
 
-        public ICollection<Specialization> Specializations { get; set; }
+        public AppUser AppUser;
+        public ICollection<DoctorSpecialization> DoctorSpecializations { get; set; }
 
         public ICollection<Appointment> Appointments { get; set; }
+
+        //ICollection<Place> Places { get; set; }
     }
 
     
@@ -78,11 +103,16 @@ namespace PogotowieCom.Models
 
     public class Specialization
     {
-        public int SpecializationId { get; set; }
-        public int Name { get; set; }
 
-        public int DoctorId { get; set; }
-        public Doctor Doctor { get; set; }
+        public Specialization()
+        {
+            this.DoctorSpecializations = new HashSet<DoctorSpecialization>();
+        }
+
+        public int SpecializationId { get; set; }
+        public string Name { get; set; }
+
+        public ICollection<DoctorSpecialization> DoctorSpecializations { get; set; }
     }
 
 
@@ -98,19 +128,44 @@ namespace PogotowieCom.Models
         }
 
         public int AppointmentId { get; set; }
-        public DateTime AppointmentStart { get; set; }
-        public DateTime AppointmentEnd { get; set; }
-        public int PlacesAvailable { get; set; }
-        public int NumberOfPatients { get; set; }
-        public decimal VisitPrice { get; set; }
+      
+        [Required(ErrorMessage ="Proszę podać datę")]
+        //[Display(Name="Data")]
+        [DataType(DataType.Date)]
+        public DateTime? AppointmentDate { get; set; }
 
-        public int DoctorId { get; set; }
+        
+        [Display(Name = "Czas rozpoczęcia ")]
+        [Required(ErrorMessage = "Proszę podać czas rozpoczęcia przyjmowania pacjentów")]
+        //[DataType(DataType.Time)]
+        public DateTime? AppointmentStart { get; set; }
+
+
+       
+        [Required(ErrorMessage = "Proszę podać czas zakończenia przyjmowania pacjentów")]
+        [TimeMustBeLater("AppointmentStart")]
+        [DataType(DataType.Time)]
+        public DateTime? AppointmentEnd { get; set; }
+
+        [Display(Name = "Ilość Miejsc ")]
+        [Required(ErrorMessage = "Proszę podać ilość miejsc")]
+        public int? PlacesAvailable { get; set; }
+
+       
+        public int? NumberOfPatients { get; set; }
+
+        [Display(Name = "Cena za wizytę ")]
+        [Range(20,1000)]
+        [Required(ErrorMessage = "Proszę podać cenę za wizytę")]
+        public decimal? VisitPrice { get; set; }
+
+        public int? DoctorId { get; set; }
         public Doctor Doctor { get; set; }
 
-        public ICollection<Patient> Patients{ get; set; }
+        //public ICollection<Patient> Patients{ get; set; }
         public IList<PatientAppointment> PatientAppointments { get; set; }
 
-        public int PlaceId { get; set; }
+        public int? PlaceId { get; set; }
         public Place Place { get; set; }
 
 
@@ -130,12 +185,23 @@ namespace PogotowieCom.Models
         }
 
         public int PlaceId { get; set; }
+        [Required(ErrorMessage ="Nazwa jest wymagana")]
+        public string PlaceName { get; set; }
+        [Required(ErrorMessage = "Nazwa kraju jest wymagana")]
         public string Country { get; set; }
+        [Required(ErrorMessage = "Nazwa miasta jest wymagana")]
         public string City { get; set; }
+        [Required(ErrorMessage = "Nazwa ulicy jest wymagana")]
         public string Street { get; set; }
-        public string Room { get; set; }
+        [Required(ErrorMessage = "Numer budynku jest wymagany")]
+        public int? BuildingNumber { get; set; }
+        [Required(ErrorMessage = "Numer pokoju jest wymagany")]
+        public int? Room { get; set; }
 
-        ICollection<Appointment> Appointments { get; set; }
+       public ICollection<Appointment> Appointments { get; set; }
+
+        //public int DoctorId { get; set; }
+        //public Doctor Doctor { get; set; }
 
     }
 

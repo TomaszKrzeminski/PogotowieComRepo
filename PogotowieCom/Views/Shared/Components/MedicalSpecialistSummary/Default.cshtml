@@ -1,0 +1,31 @@
+﻿@model List<Doctor>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Specjaliści w okolicy</title>
+</head>
+<body>
+    @if (Model != null && Model.Count() > 0)
+    {
+        foreach (var doctor in Model)
+        {
+           @*<h4>@doctor.AppUser.UserName  @doctor.AppUser.Surname</h4>*@
+           <h4>@doctor.PriceForVisit</h4>
+
+        }
+               
+    }
+    else
+    {
+        <h2>Brak dostępnych specjalistów</h2>
+    }
+
+</body>
+</html>
+</html>

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PogotowieCom.Models;
+using PogotowieCom.Compontnts;
 using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace PogotowieCom
@@ -28,26 +29,28 @@ namespace PogotowieCom
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IRepository, AppRepository>();
-            services.AddTransient<AppIdentityDbContext>();
+            services.AddTransient<IRepository, Repository>();
+            services.AddScoped<AppIdentityDbContext>();
             services.AddDbContext<AppIdentityDbContext>(options =>
                  options.UseSqlServer(
                      Configuration["Data:PogotowieCom:ConnectionString"]));
 
 
             services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppIdentityDbContext>().AddDefaultTokenProviders();
+            services.ConfigureApplicationCookie(opts => opts.LoginPath = "/User/Login");
             services.AddMvc();
-        }
+            //services.AddMvcCore().AddJsonFormatters().AddAuthorization().AddDataAnnotations();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppIdentityDbContext context)
+        }
+            // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppIdentityDbContext context)
         {
             app.UseDeveloperExceptionPage();
             app.UseStatusCodePages();
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseMvc(routes => {
-                routes.MapRoute(name: "default", template: "{controller=Home}/{action=HomePage}/{id?}");
+                routes.MapRoute(name: "None", template: "{controller=Home}/{action=HomePage}/{id?}");
 
 
             });

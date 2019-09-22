@@ -1,0 +1,13 @@
+﻿@model List<Specialization>
+@{
+Layout=null;
+}
+<table class="table table-sm table-bordered">
+@foreach (var specialization in Model.Take(3))
+{<tr><td>
+         <p class="text-white">@specialization.Name</p> 
+</td>
+    </tr>
+   
+}
+</table>

@@ -1,0 +1,67 @@
+﻿@model Place
+@{
+    ViewData["Title"] = "AddPlace";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-danger" asp-validation-summary="All"></div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Dodaj Miejsce Wizyty</h2>
+        </div>
+    </div>
+    <div class="row">
+        <form asp-controller="Appointment" asp-action="AddPlace">
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="PlaceName" class="text-danger"></span></div>
+                    <lable class="pre-scrollable ">Nazwa Miejsca</lable>
+                    <input asp-for="PlaceName" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Country" class="text-danger"></span></div>
+                    <lable class="pre-scrollable ">Kraj</lable>
+                    <input asp-for="Country" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="City" class="text-danger"></span></div>
+                    <lable>Miasto</lable>
+                    <input asp-for="City" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Street" class="text-danger"></span></div>
+                    <lable>Ulica</lable>
+                    <input asp-for="Street" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="BuildingNumber" class="text-danger"></span></div>
+                    <lable>Nr Budynku</lable>
+                    <input asp-for="BuildingNumber" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Room" class="text-danger"></span></div>
+                    <lable>Pokój</lable>
+                    <input asp-for="Room" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2">
+                    <button class="btn btn-warning" type="submit">Utwórz</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

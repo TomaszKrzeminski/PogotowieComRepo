@@ -1,0 +1,30 @@
+﻿@model string[]
+@{
+    ViewData["Title"] = "ChooseRole";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="bg-primary m-1 p-1 text-white"><h4>Tworzenie Użytkownika</h4></div>
+<div asp-validation-summary=" All" class="text-danger"></div>
+
+<form asp-action="Create" method="get">
+
+
+
+    <div class=" form-group">
+        <label asp-name="Typ Użytkownika">
+            <select class="form-control" name="Role">
+                @foreach (var role in Model)
+                {
+                    <option>@role</option>
+                }
+            </select>
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Wybierz</button>
+    <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+
+
+
+</form>

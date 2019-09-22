@@ -1,0 +1,21 @@
+﻿@model SearchDoctorViewModel
+
+@{Layout = null; }
+
+<div class="col-lg-12">
+   
+</div>
+
+
+    <table class="table-bordered">
+        <thead><tr><th>Nazwisko</th><th>Imię</th><th>Rezerwuj wizytę</th></tr></thead>
+       @foreach (var user in Model.Users)
+       {
+           <tr>
+               <td>@user.Surname</td><td>@user.UserName</td><td><button class="btn-success" type="submit">Wizyta</button></td>
+           </tr>
+       }
+    </table>
+
+
+

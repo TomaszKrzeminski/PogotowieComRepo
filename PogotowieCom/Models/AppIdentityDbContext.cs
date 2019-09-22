@@ -23,6 +23,7 @@ namespace PogotowieCom.Models
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<PatientAppointment>().HasKey(sc => new { sc.PatientId, sc.AppointmentId });
+            modelBuilder.Entity<DoctorSpecialization>().HasKey(sc => new { sc.DoctorId, sc.SpecializationId });
         }
 
 

@@ -18,8 +18,38 @@ namespace PogotowieCom.Models
                 context.Database.EnsureCreated();
                 context.Database.Migrate();
 
+                 void SeedSpecializations()
+                {
+                    if (context.Specializations.Any() == false )
+                    {
+                        List<string> list = new List<string>() { "Ginekolog", "Stomatolog", "Ortopeda", "Chirurg", "Dermatolog", "Psychiatra", "Psycholog", "Internista", "Laryngolog", "Okulista", "Neurolog", "Fizjoterapeuta", "Urolog", "Sexuolog", "Alergolog",  "Ortopeda", "Chirurg Szczękowy", "Lekarz Sportowy" };
 
-                async void SeedAdminUser()
+                        foreach (var item in list)
+                        {
+                            try
+                            {
+                                                                                        
+                               
+                                    Specialization specialization = new Specialization() { Name = item };
+                                 context.Specializations.Add(specialization);
+                                 context.SaveChanges();  
+                                                             
+
+                            }
+                            catch (Exception ex)
+                            {
+                                
+                            }
+                        }
+                    }
+
+                    
+
+
+                }
+
+
+                 void SeedAdminUser()
                 {
                     var user = new AppUser
                     {
@@ -39,15 +69,15 @@ namespace PogotowieCom.Models
 
                     if (!context.Roles.Any(r => r.Name == "Administrator"))
                     {
-                        await roleStore.CreateAsync(new IdentityRole { Name = "Administrator", NormalizedName = "Administrator" });
+                         roleStore.CreateAsync(new IdentityRole { Name = "Administrator", NormalizedName = "Administrator" });
                     }
-                    if (!context.Roles.Any(r => r.Name == "PatientRole"))
+                    if (!context.Roles.Any(r => r.Name == "Pacjent"))
                     {
-                        await roleStore.CreateAsync(new IdentityRole { Name = "PatientRole", NormalizedName = "PatientRole" });
+                         roleStore.CreateAsync(new IdentityRole { Name = "Pacjent", NormalizedName = "Pacjent" });
                     }
-                    if (!context.Roles.Any(r => r.Name == "DoctorRole"))
+                    if (!context.Roles.Any(r => r.Name == "Doktor"))
                     {
-                        await roleStore.CreateAsync(new IdentityRole { Name = "DoctorRole", NormalizedName = "DoctorRole" });
+                        roleStore.CreateAsync(new IdentityRole { Name = "Doktor", NormalizedName = "Doktor" });
                     }
 
                     if (!context.Users.Any(u => u.UserName == user.UserName))
@@ -56,22 +86,24 @@ namespace PogotowieCom.Models
                         var hashed = password.HashPassword(user, "Sekret123@");
                         user.PasswordHash = hashed;
                         var userStore = new UserStore<AppUser>(context);
-                        await userStore.CreateAsync(user);
-                        await userStore.AddToRoleAsync(user, "Administrator");
+                        userStore.CreateAsync(user);
+                         userStore.AddToRoleAsync(user, "Administrator");
                     }
 
-                    await context.SaveChangesAsync();
+                     context.SaveChangesAsync();
                 }
 
 
+
+
                 SeedAdminUser();
+                SeedSpecializations();
 
 
-
-                context.SaveChanges();
+                //context.SaveChanges();
             }
 
-              
+
         }
     }
 }

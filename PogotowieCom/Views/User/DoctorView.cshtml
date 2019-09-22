@@ -1,4 +1,4 @@
-﻿@model CreateUserModel
+﻿@model CreateDoctorModel
 @{
     ViewData["Title"] = "Create";
     Layout = "_Layout";
@@ -7,7 +7,12 @@
 <div class="bg-primary m-1 p-1 text-white"><h4>Tworzenie Użytkownika</h4></div>
 <div asp-validation-summary=" All" class="text-danger"></div>
 
-<form asp-action="Create" method="post">
+<form asp-action="CreateDoctor" method="post">
+
+
+    <input type="hidden" name="ChooseRole" value="@Model.ChooseRole" />
+
+
 
     <div class="form-group">
         <label asp-for="Name">Imię</label>
@@ -39,6 +44,11 @@
         <label asp-for="PhoneNumber">Telefon</label>
         <input asp-for="PhoneNumber" class="form-control" />
     </div>
+
+    <div class="form-group">
+        <label asp-for="PriceForVisit">Cena za Wizytę</label>
+        <input asp-for="PriceForVisit" class="form-control" />
+    </div>
     <div class="form-group">
         <label asp-for="Password">Hasło</label>
         <input asp-for="Password" class="form-control" />
@@ -48,3 +58,6 @@
     <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
 
 </form>
+
+
+ 

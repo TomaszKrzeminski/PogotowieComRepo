@@ -13,50 +13,111 @@ namespace PogotowieCom.Controllers
     {
         private UserManager<AppUser> userManager;
         private SignInManager<AppUser> signInManager;
-        public UserController(UserManager<AppUser> usrMgr, SignInManager<AppUser> signinMgr)
+        private RoleManager<IdentityRole> roleManager;
+        private IRepository repository;
+        private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
+        public UserController(UserManager<AppUser> usrMgr, SignInManager<AppUser> signinMgr,RoleManager<IdentityRole> roleMgr,IRepository repo)
         {
             userManager = usrMgr;
             signInManager = signinMgr;
+            roleManager = roleMgr;
+            repository = repo;
         }
 
 
-        public ViewResult Create()
+        public ViewResult ChooseRole()
         {
-            return View();
+            string[] list = GetRoles().ToArray();
+            return View(list);
         }
 
-
-
-
-
-        [HttpPost]
-        public async Task<IActionResult> Create(CreateUserModel model)
+        public ViewResult Settings()
         {
-            IdentityResult result;
-            if (ModelState.IsValid)
+            return View("Settings"/*,new ViewResult {Controller=nameof(User),Action=nameof(Settings) }*/);
+        }
+
+       
+
+
+        public ActionResult RemoveSpecialization(ManageSpecializationsViewModel model)
+        {
+            repository.DeleteDoctorSpecialization(model.UserId, model.SpecializationId);
+            return RedirectToAction("ManageSpecializations");
+        }
+        [Authorize]
+        public ViewResult ManageSpecializations()
+        {
+            AppUser user = GetCurrentUserAsync().Result;
+            ManageSpecializationsViewModel model =new ManageSpecializationsViewModel() {specializations=repository.GetDoctorSpecializations(user.Id),UserId=user.Id,SpecializationName="None" };
+
+            return View(model);
+        }
+
+        public ViewResult Create(string Role)
+        {
+
+            switch (Role)
             {
-                foreach (string userId in model.IdsToAdd ?? new string[] { })
-                {
-                    AppUser user = await userManager.FindByIdAsync(userId);
-                    if (user != null)
+
+                case "Pacjent":
                     {
-                        result = await userManager.AddToRoleAsync(user,
-                            model.RoleName);
-                        if (!result.Succeeded)
-                        {
-                            AddErrorsFromResult(result);
-                        }
+                        return View("PatientView",new CreatePatientModel() { ChooseRole = Role });
+                        break;
                     }
+                case "Doktor":
+                    {
+                        return View("DoctorView",new CreateDoctorModel() { ChooseRole = Role });
+                        break;
+                    }
+                default:
+                    return View("Error");
+                    break;
+            }
+
+
+           
+        }
+
+
+        public List<string> GetRoles()
+        {
+            List<string> list = new List<string>();
+
+           IList<IdentityRole> Roles=    roleManager.Roles.ToList();
+
+
+            if(Roles!=null&&Roles.Count>0)
+            {
+               
+                try
+                {
+                  IdentityRole roleAdmin = Roles.Where(r => r.Name == "Administrator").First();
+                  if(roleAdmin!=null)
+                    {
+                        Roles.Remove(roleAdmin);
+                    }
+                }
+                catch
+                {
+
+                }
+               
+                foreach (var role in Roles)
+                {
+                    list.Add(role.Name);
                 }
             }
 
+            return list;
         }
-       
+
+
+               
   
 
 
 [HttpPost]
-        public async Task<IActionResult> Create(CreateUserModel model)
+        public async Task<IActionResult> CreatePatient(CreatePatientModel model)
         {
             if (ModelState.IsValid)
             {
@@ -67,7 +128,9 @@ namespace PogotowieCom.Controllers
                     City = model.City,
                     ZipCode = model.ZipCode,
                     Email = model.Email,
-                    PhoneNumber = model.PhoneNumber
+                    PhoneNumber = model.PhoneNumber,
+                    ChooseRole = model.ChooseRole
+
 
 
                 };
@@ -75,8 +138,13 @@ namespace PogotowieCom.Controllers
 
                 IdentityResult result = await userManager.CreateAsync(user, model.Password);
 
+               
+
                 if (result.Succeeded)
                 {
+                    Patient patient = new Patient() { NumberInQueue = 0 };
+                    repository.AddPatientToUser(patient, user.Email);
+                   await repository.AddRoleToUser(user.Email, user.ChooseRole);
                     return RedirectToAction("HomePage","Home",null);
                 }
                 else
@@ -89,13 +157,72 @@ namespace PogotowieCom.Controllers
 
             }
 
-            return View(model);
+            return View("PatientView",model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateDoctor(CreateDoctorModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = new AppUser
+                {
+                    UserName = model.Name,
+                    Surname = model.Surname,
+                    City = model.City,
+                    ZipCode = model.ZipCode,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    ChooseRole = model.ChooseRole
+
+
+
+                };
+
+
+                IdentityResult result = await userManager.CreateAsync(user, model.Password);
+                
+                
+                if (result.Succeeded)
+                {
+                    Doctor doctor = new Doctor() { PriceForVisit = model.PriceForVisit };
+                    repository.AddDoctorToUser(doctor, user.Email);
+                    await repository.AddRoleToUser(user.Email, user.ChooseRole);
+                    //return RedirectToAction("HomePage", "Home", null);
+                    return RedirectToAction("AddDoctorDetails", "User", user);
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+
+            }
+
+            return View("DoctorView",model);
         }
 
 
+        public ViewResult AddDoctorDetails(AppUser user)
+        {
 
-
-
+            if(user.DoctorId==null)
+            {
+                user = GetCurrentUserAsync().Result;
+            }
+            List<Specialization> list = repository.Specializations.ToList();
+            DoctorDetailsViewModel model = new DoctorDetailsViewModel() { DoctorId =(int)user.DoctorId,SpecializationList=list };
+           
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult AddDoctorDetails(DoctorDetailsViewModel model)
+        {
+            repository.AddSpecializationToDoctor(model.DoctorId, model.Specialization.Name);
+            return RedirectToAction("ManageSpecializations");
+        }
 
         public ViewResult ShowUsers()
         {
