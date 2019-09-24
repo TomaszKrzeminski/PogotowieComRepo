@@ -1,0 +1,30 @@
+﻿@model Appointment
+@{
+    ViewData["Title"] = "AppointmentDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Rezerwuj Godzinę</h2>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <table class="table table-bordered">
+                <thead><tr><th>Nr Wizyty</th><th>Nazwa Miejsca</th><th>Kraj</th><th>Miasto</th><th>Data</th><th>Godzina Rozpoczęcia</th><th>Godzina Zakończenia</th><th>Pozostało wolnych miejsc</th><th>Rezerwuj</th></tr></thead>
+               
+                    <tr>
+                        <td>@Model.AppointmentId</td>
+                        <td>@Model.Place.PlaceName</td>
+                        <td>@Model.Place.Country</td>
+                        <td>@Model.Place.City</td>
+                        <td>@Model.AppointmentDate.Value.ToShortDateString()</td>
+                        <td>@Model.AppointmentStart.Value.ToShortTimeString()</td>
+                        <td>@Model.AppointmentEnd.Value.ToShortTimeString()</td>
+                        <td>@(Model.PlacesAvailable - Model.NumberOfPatients)</td>
+                        
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>

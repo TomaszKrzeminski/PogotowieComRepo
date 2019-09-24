@@ -5,16 +5,12 @@ using System.Threading.Tasks;
 
 namespace PogotowieCom.Models
 {
-    public class SearchDoctorViewModel
+    public class ShowAppointmentViewModel
     {
-        public SearchDoctorViewModel()
-        {
-            Users = new List<AppUser>();
-        }
-
-        public List<AppUser> Users { get; set;}
+        public string DoctorId { get; set; }
         public string Country { get; set; }
         public string City { get; set; }
-        
+
+
     }
 }

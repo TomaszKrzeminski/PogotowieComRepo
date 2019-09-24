@@ -9,6 +9,7 @@ namespace PogotowieCom.Models
 {
     public interface IRepository
     {
+        int GetDoctorIdByUserId(string UserId);
         bool AddPatientToUser(Patient patient, string Email);
         bool AddDoctorToUser(Doctor doctor, string Email);
          Task<bool> AddRoleToUser(string Email, string Role);
@@ -245,6 +246,8 @@ namespace PogotowieCom.Models
                 {
                     modelSearch.Users =list ;
                 }
+                modelSearch.City = model.City;
+                modelSearch.Country = model.Country;
                 return modelSearch;
 
 
@@ -371,6 +374,20 @@ namespace PogotowieCom.Models
             catch(Exception ex)
             {
                 return new List<Appointment>();
+            }
+        }
+
+        public int GetDoctorIdByUserId(string UserId)
+        {
+            try
+            {
+
+                int Id = (int)context.Users.Find(UserId).DoctorId;
+                return Id;
+            }
+            catch(Exception ex)
+            {
+                return 0;
             }
         }
     }

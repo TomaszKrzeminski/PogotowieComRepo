@@ -43,6 +43,7 @@ namespace PogotowieCom.Controllers
         {
 
             SearchDoctorViewModel doctormodel = repository.SearchForDoctor(model);
+            
 
             return PartialView(doctormodel);
         }

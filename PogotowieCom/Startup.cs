@@ -39,7 +39,7 @@ namespace PogotowieCom
             services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppIdentityDbContext>().AddDefaultTokenProviders();
             services.ConfigureApplicationCookie(opts => opts.LoginPath = "/User/Login");
             services.AddMvc();
-            //services.AddMvcCore().AddJsonFormatters().AddAuthorization().AddDataAnnotations();
+            services.AddMvcCore().AddDataAnnotations();
 
         }
             // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

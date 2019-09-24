@@ -21,7 +21,38 @@ namespace PogotowieCom.Controllers
         }
 
 
+        public IActionResult AppointmentDetails(int AppointmentId)
+        {
+            Appointment appointment; 
+            try
+            {
+                appointment = repository.Appointments.Where(a => a.AppointmentId == AppointmentId).First();
+            }
+            catch(Exception ex)
+            {
+                appointment = new Appointment();
+            }
+            return View(appointment);
 
+        }
+
+        [HttpPost]
+        public IActionResult ReserveAppointment(ReserveAppointmentViewModel model)
+        {
+
+            return View();
+
+        }
+
+
+        public IActionResult ShowAppointments(ShowAppointmentViewModel model)
+        {
+
+            int DoctorId = repository.GetDoctorIdByUserId(model.DoctorId);
+            List<Appointment> list = repository.GetUserAppointments(DoctorId).Where(a=>a.Place.Country==model.Country&&a.Place.City==model.City).ToList();
+
+            return View(list);
+        }
 
         public IActionResult ManageAppointments()
         {
@@ -53,18 +84,12 @@ namespace PogotowieCom.Controllers
         public IActionResult ChoosePlace()
         {
             SelectPlaceViewModel model = new SelectPlaceViewModel();
-            return View(model);
+            return View("ChoosePlace",model);
         }
 
 
 
-        //public IActionResult ShowPlaces(SelectPlaceViewModel model)
-        //{
-        //    List<Place> PlacesList = repository.SelectPlaces(model);
-
-        //    return PartialView(PlacesList);
-        //}
-
+       
 
         public IActionResult ShowPlaces(SelectPlaceViewModel model)
         {
@@ -78,18 +103,8 @@ namespace PogotowieCom.Controllers
             else
             {
                 List<Place> PlacesList = new List<Place>();
-                //if (String.IsNullOrEmpty(model.City))
-                //{
-                //    ModelState.AddModelError("City", "Podaj Miasto");
-                //}
-                //if (String.IsNullOrEmpty(model.City))
-                //{
-                //    ModelState.AddModelError("Country", "Podaj Kraj");
-                //}
-                //if (String.IsNullOrEmpty(model.City))
-                //{
-                //    ModelState.AddModelError("Street", "Podaj Ulice");
-                //}
+               
+               
                 return View("ChoosePlace",model);
             }
 

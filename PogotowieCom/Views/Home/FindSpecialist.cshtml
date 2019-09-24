@@ -3,18 +3,35 @@
 @{Layout = null; }
 
 <div class="col-lg-12">
-   
+
 </div>
 
 
     <table class="table-bordered">
-        <thead><tr><th>Nazwisko</th><th>Imię</th><th>Rezerwuj wizytę</th></tr></thead>
-       @foreach (var user in Model.Users)
-       {
-           <tr>
-               <td>@user.Surname</td><td>@user.UserName</td><td><button class="btn-success" type="submit">Wizyta</button></td>
-           </tr>
-       }
+        <thead><tr><th>Nazwisko </th><th>Imię </th><th>Rezerwuj wizytę </th></tr></thead>
+
+
+
+
+
+
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.Surname</td>
+                <td>@user.UserName</td>
+                <td>
+                    <form method="get" asp-action="ShowAppointments" asp-controller="Appointment">
+                        <input type="hidden" name="DoctorId" value="@user.Id" />
+                        <input type="hidden" name="Country" value="@Model.Country" />
+                        <input type="hidden" name="City" value="@Model.City" />
+                        <button class="btn btn-primary" type="submit">Wizyty</button>
+                    </form>
+                </td>
+               
+</tr>
+        }
+
     </table>
 
 
