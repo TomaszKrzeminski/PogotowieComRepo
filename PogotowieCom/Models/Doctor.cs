@@ -42,6 +42,8 @@ namespace PogotowieCom.Models
         public int PatientId { get; set; }
         public Patient Patient { get; set; }
 
+        public int? NumberInQueue { get; set; }
+
         public int AppointmentId { get; set; }
         public Appointment Appointment { get; set; }
     }
@@ -66,7 +68,7 @@ namespace PogotowieCom.Models
             //this.Appointments = new HashSet<Appointment>();
         }
 
-        public int? NumberInQueue { get; set; }
+       
 
         
         public  AppUser AppUser;

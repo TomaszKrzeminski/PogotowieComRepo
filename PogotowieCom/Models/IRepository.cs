@@ -12,20 +12,23 @@ namespace PogotowieCom.Models
         int GetDoctorIdByUserId(string UserId);
         bool AddPatientToUser(Patient patient, string Email);
         bool AddDoctorToUser(Doctor doctor, string Email);
-         Task<bool> AddRoleToUser(string Email, string Role);
+        Task<bool> AddRoleToUser(string Email, string Role);
         bool AddSpecialization(string Name);
         bool AddSpecializationToDoctor(int DoctorId, string Name);
         bool AddPlace(Place place);
         bool AddAppointment(AddAppointmentViewModel model);
+        Appointment GetAppointmentById(int Id);
         List<Specialization> GetDoctorSpecializations(string UserId);
         List<Place> SelectPlaces(SelectPlaceViewModel model);
         List<Appointment> GetUserAppointments(int DoctorId);
-        bool DeleteDoctorSpecialization(string UserId,int SpecializationId);
-       SearchDoctorViewModel SearchForDoctor(HomePageViewModel model);
+        bool DeleteDoctorSpecialization(string UserId, int SpecializationId);
+        bool ReserveAppointment(ReserveAppointmentViewModel model);
+        SearchDoctorViewModel SearchForDoctor(HomePageViewModel model);
         Place GetPlaceById(int PlaceId);
         IQueryable<Appointment> Appointments { get; set; }
         IQueryable<Place> Places { get; set; }
-        IQueryable<Specialization> Specializations { get;}
+        IQueryable<Specialization> Specializations { get; }
+        List<int> GetBookedAppointments(int AppointmentId);
     }
 
 
@@ -34,23 +37,23 @@ namespace PogotowieCom.Models
     {
         public IQueryable<Appointment> Appointments { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public IQueryable<Place> Places { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IQueryable<Specialization> Specializations { get =>context.Specializations.AsQueryable() ;  }
-      
+        public IQueryable<Specialization> Specializations { get => context.Specializations.AsQueryable(); }
+
 
         private AppIdentityDbContext context;
         private UserManager<AppUser> userManager;
-        public  Repository(AppIdentityDbContext context,UserManager<AppUser> userMgr)
+        public Repository(AppIdentityDbContext context, UserManager<AppUser> userMgr)
         {
             this.context = context;
             userManager = userMgr;
         }
 
-        public bool AddPatientToUser(Patient patient,string Email)
+        public bool AddPatientToUser(Patient patient, string Email)
         {
             try
             {
                 AppUser user = context.Users.Where(u => u.Email == Email).First();
-                if(user!=null)
+                if (user != null)
                 {
                     user.Patient = patient;
                     context.SaveChanges();
@@ -61,7 +64,7 @@ namespace PogotowieCom.Models
                     return false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -83,7 +86,7 @@ namespace PogotowieCom.Models
                     return false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -91,8 +94,8 @@ namespace PogotowieCom.Models
 
         public async Task<bool> AddRoleToUser(string Email, string Role)
         {
-            
-            if(Email!=null&&Role!=null)
+
+            if (Email != null && Role != null)
             {
                 try
                 {
@@ -123,9 +126,9 @@ namespace PogotowieCom.Models
 
             try
             {
-                
 
-               if(context.Specializations.Where(s=>s.Name!=null&&s.Name==Name).Any()==false)
+
+                if (context.Specializations.Where(s => s.Name != null && s.Name == Name).Any() == false)
                 {
                     Specialization specialization = new Specialization() { Name = Name };
                     context.Specializations.Add(specialization);
@@ -135,7 +138,7 @@ namespace PogotowieCom.Models
                 return false;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -149,10 +152,10 @@ namespace PogotowieCom.Models
 
                 Doctor doctor = context.Doctors.Find(DoctorId);
 
-                if(doctor!=null)
+                if (doctor != null)
                 {
 
-                    if(doctor.DoctorSpecializations!=null&&doctor.DoctorSpecializations.Where(d=>d.Specialization.Name==Name).Any())
+                    if (doctor.DoctorSpecializations != null && doctor.DoctorSpecializations.Where(d => d.Specialization.Name == Name).Any())
                     {
                         return false;
                     }
@@ -173,7 +176,7 @@ namespace PogotowieCom.Models
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -190,10 +193,10 @@ namespace PogotowieCom.Models
                 //return list;
 
                 AppUser user = context.Users.Find(UserId);
-                if(user.DoctorId!=null)
+                if (user.DoctorId != null)
                 {
                     Doctor doctor = context.Doctors.Include(p => p.DoctorSpecializations).ThenInclude(d => d.Specialization).Where(d => d.DoctorId == user.DoctorId).First();
-                  
+
                     list = doctor.DoctorSpecializations.Select(s => s.Specialization).ToList();
                     return list;
                 }
@@ -201,7 +204,7 @@ namespace PogotowieCom.Models
                 return list;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return list;
             }
@@ -210,11 +213,11 @@ namespace PogotowieCom.Models
 
         }
 
-        public bool DeleteDoctorSpecialization(string UserId,int  SpecializationId)
+        public bool DeleteDoctorSpecialization(string UserId, int SpecializationId)
         {
             try
             {
-                
+
                 AppUser user = context.Users.Find(UserId);
                 if (user.DoctorId != null)
                 {
@@ -237,14 +240,14 @@ namespace PogotowieCom.Models
 
         public SearchDoctorViewModel SearchForDoctor(HomePageViewModel model)
         {
-            SearchDoctorViewModel modelSearch =new SearchDoctorViewModel();
+            SearchDoctorViewModel modelSearch = new SearchDoctorViewModel();
             try
             {
-                List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s=>s.DoctorSpecializations).Where(u=>u.Doctor.DoctorSpecializations.Where(s=>s.Specialization.Name==model.MedicalSpecialist).Any()).ToList();
+                List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).ToList();
                 //List<Doctor>   list = context.Users.Include(d=>d.DoctorSpecializations).Where(d => d.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).ToList();
                 if (list != null)
                 {
-                    modelSearch.Users =list ;
+                    modelSearch.Users = list;
                 }
                 modelSearch.City = model.City;
                 modelSearch.Country = model.Country;
@@ -252,7 +255,7 @@ namespace PogotowieCom.Models
 
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return modelSearch;
             }
@@ -266,7 +269,7 @@ namespace PogotowieCom.Models
         {
             try
             {
-                if(context.Places.Where(p=>p.Country==place.Country&&p.City==place.City&&p.Street==place.Street&&p.BuildingNumber==place.BuildingNumber&&p.Room==place.Room).Any())
+                if (context.Places.Where(p => p.Country == place.Country && p.City == place.City && p.Street == place.Street && p.BuildingNumber == place.BuildingNumber && p.Room == place.Room).Any())
                 {
                     return false;
                 }
@@ -276,7 +279,7 @@ namespace PogotowieCom.Models
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -288,14 +291,14 @@ namespace PogotowieCom.Models
             try
             {
 
-                list = context.Places.Where(p => p.Country == model.Country&&p.City==model.City&&p.Street==model.Street).ToList();
+                list = context.Places.Where(p => p.Country == model.Country && p.City == model.City && p.Street == model.Street).ToList();
 
-                if(model.BuildingNumber!=0)
+                if (model.BuildingNumber != 0)
                 {
                     list = list.Where(p => p.BuildingNumber == model.BuildingNumber).ToList();
                 }
 
-                if(model.Room!=0)
+                if (model.Room != 0)
                 {
                     list = list.Where(p => p.Room == model.Room).ToList();
                 }
@@ -303,7 +306,7 @@ namespace PogotowieCom.Models
                 return list;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return list;
             }
@@ -317,7 +320,7 @@ namespace PogotowieCom.Models
                 place = context.Places.Find(PlaceId);
                 return place;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return place;
             }
@@ -348,7 +351,7 @@ namespace PogotowieCom.Models
 
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -362,16 +365,16 @@ namespace PogotowieCom.Models
         {
             try
             {
-                
-                List<Appointment> list = context.Appointments.Include(p=>p.Place).Where(a => a.DoctorId == DoctorId).ToList();
-                if(list==null)
+
+                List<Appointment> list = context.Appointments.Include(p => p.Place).Where(a => a.DoctorId == DoctorId).ToList();
+                if (list == null)
                 {
                     return new List<Appointment>();
                 }
                 return list;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new List<Appointment>();
             }
@@ -385,10 +388,70 @@ namespace PogotowieCom.Models
                 int Id = (int)context.Users.Find(UserId).DoctorId;
                 return Id;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return 0;
             }
+        }
+
+        public Appointment GetAppointmentById(int Id)
+        {
+            try
+            {
+                Appointment data = context.Appointments.Include(p => p.Place).Where(a => a.AppointmentId == Id).First();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                return new Appointment();
+            }
+        }
+
+        public bool ReserveAppointment(ReserveAppointmentViewModel model)
+        {
+            try
+            {
+                Appointment appointment=context.Appointments.Include(d=>d.PatientAppointments).Where(a=>a.AppointmentId==model.AppointmentId).First();
+                appointment.NumberOfPatients += 1;
+                Patient patient = context.Patients.Where(a => a.PatientId == model.PatientId).First();
+                PatientAppointment patientappointment = new PatientAppointment();
+                patientappointment.Appointment = appointment;
+                patientappointment.Patient = patient;
+                patientappointment.NumberInQueue = model.NumberInQueue;
+                appointment.PatientAppointments.Add(patientappointment);
+                
+
+                context.SaveChanges();
+                return true;
+
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public List<int> GetBookedAppointments(int AppointmentId)
+        {
+            List<int> list = new List<int>();
+
+            try
+            {
+
+                Appointment appointment = context.Appointments.Include(x => x.PatientAppointments).Where(a=>a.AppointmentId == AppointmentId).First();
+                foreach (var a in appointment.PatientAppointments)
+                {
+                    list.Add((int)a.NumberInQueue);
+                }
+                return list;
+            }
+            catch(Exception ex)
+            {
+                return list;
+            }
+
+
+
         }
     }
 

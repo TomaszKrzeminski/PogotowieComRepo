@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,6 +10,7 @@ using PogotowieCom.Models;
 
 namespace PogotowieCom.Controllers
 {
+    [Authorize]
     public class AppointmentController : Controller
     {
         private IRepository repository;
@@ -23,24 +25,38 @@ namespace PogotowieCom.Controllers
 
         public IActionResult AppointmentDetails(int AppointmentId)
         {
-            Appointment appointment; 
+            ReserveAppointmentViewModel model;
             try
             {
-                appointment = repository.Appointments.Where(a => a.AppointmentId == AppointmentId).First();
+                Appointment appointment = repository.GetAppointmentById(AppointmentId);
+                AppUser user = GetCurrentUserAsync().Result;
+                int PatientId =(int)user.PatientId;
+                model = new ReserveAppointmentViewModel(repository,appointment, user.Id, AppointmentId, PatientId);
+
             }
             catch(Exception ex)
             {
-                appointment = new Appointment();
+                return View("Error",null);
             }
-            return View(appointment);
+            return View(model);
 
         }
-
+        [Authorize(Roles="Pacjent")]
         [HttpPost]
         public IActionResult ReserveAppointment(ReserveAppointmentViewModel model)
         {
 
-            return View();
+           bool check= repository.ReserveAppointment(model);
+
+            if(check)
+            {
+                return RedirectToAction("AppointmentDetails", new { AppointmentId = model.AppointmentId });
+            }
+            else
+            {
+                return View("Error", null);
+            }
+            
 
         }
 
@@ -54,6 +70,7 @@ namespace PogotowieCom.Controllers
             return View(list);
         }
 
+        [Authorize(Roles = "Doktor")]
         public IActionResult ManageAppointments()
         {
             int DoctorId =(int) GetCurrentUserAsync().Result.DoctorId;
@@ -61,12 +78,14 @@ namespace PogotowieCom.Controllers
             return View(list);
         }
 
-
+        [Authorize(Roles = "Doktor")]
         public IActionResult AddPlace()
         {
             Place place = new Place();
             return View(place);
         }
+
+        [Authorize(Roles = "Doktor")]
         [HttpPost]
         public IActionResult AddPlace(Place model)
         {
@@ -81,6 +100,7 @@ namespace PogotowieCom.Controllers
             }
         }
 
+        [Authorize(Roles = "Doktor")]
         public IActionResult ChoosePlace()
         {
             SelectPlaceViewModel model = new SelectPlaceViewModel();
@@ -89,8 +109,8 @@ namespace PogotowieCom.Controllers
 
 
 
-       
 
+        [Authorize]
         public IActionResult ShowPlaces(SelectPlaceViewModel model)
         {
 
@@ -110,7 +130,7 @@ namespace PogotowieCom.Controllers
 
         }
 
-
+        [Authorize(Roles = "Doktor")]
         public IActionResult AddAppointment(int id = 0)
         {
             AppUser user = GetCurrentUserAsync().Result;
@@ -119,7 +139,7 @@ namespace PogotowieCom.Controllers
             AddAppointmentViewModel model = new AddAppointmentViewModel() { PlaceId = id, place = repository.GetPlaceById(id),DoctorId=DoctorId };
             return View(model);
         }
-
+        [Authorize(Roles = "Doktor")]
         [HttpPost]
         public IActionResult AddAppointment(AddAppointmentViewModel model)
         {

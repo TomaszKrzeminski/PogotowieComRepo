@@ -31,14 +31,15 @@ namespace PogotowieCom.Controllers
             return View(list);
         }
 
+        [Authorize]
         public ViewResult Settings()
         {
             return View("Settings"/*,new ViewResult {Controller=nameof(User),Action=nameof(Settings) }*/);
         }
 
-       
 
 
+        [Authorize]
         public ActionResult RemoveSpecialization(ManageSpecializationsViewModel model)
         {
             repository.DeleteDoctorSpecialization(model.UserId, model.SpecializationId);
@@ -116,7 +117,7 @@ namespace PogotowieCom.Controllers
   
 
 
-[HttpPost]
+        [HttpPost]
         public async Task<IActionResult> CreatePatient(CreatePatientModel model)
         {
             if (ModelState.IsValid)
@@ -142,7 +143,7 @@ namespace PogotowieCom.Controllers
 
                 if (result.Succeeded)
                 {
-                    Patient patient = new Patient() { NumberInQueue = 0 };
+                    Patient patient = new Patient() {  };
                     repository.AddPatientToUser(patient, user.Email);
                    await repository.AddRoleToUser(user.Email, user.ChooseRole);
                     return RedirectToAction("HomePage","Home",null);
@@ -240,7 +241,7 @@ namespace PogotowieCom.Controllers
         }
 
 
-
+        [Authorize]
         public async Task<IActionResult> LogOut()
         {
             try

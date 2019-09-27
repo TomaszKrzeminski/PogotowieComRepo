@@ -1,7 +1,12 @@
-﻿@model Appointment
+﻿@model ReserveAppointmentViewModel
 @{
     ViewData["Title"] = "AppointmentDetails";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var color = "";
+
+
+
 }
 
 <h2>Rezerwuj Godzinę</h2>
@@ -10,21 +15,101 @@
     <div class="row">
         <div class="col-lg-12">
             <table class="table table-bordered">
-                <thead><tr><th>Nr Wizyty</th><th>Nazwa Miejsca</th><th>Kraj</th><th>Miasto</th><th>Data</th><th>Godzina Rozpoczęcia</th><th>Godzina Zakończenia</th><th>Pozostało wolnych miejsc</th><th>Rezerwuj</th></tr></thead>
-               
+                <thead><tr><th>Nr Wizyty</th><th>Nazwa Miejsca</th><th>Kraj</th><th>Miasto</th><th>Data</th><th>Godzina Rozpoczęcia</th><th>Godzina Zakończenia</th><th>Pozostało wolnych miejsc</th></tr></thead>
+
+                <tbody>
                     <tr>
-                        <td>@Model.AppointmentId</td>
-                        <td>@Model.Place.PlaceName</td>
-                        <td>@Model.Place.Country</td>
-                        <td>@Model.Place.City</td>
-                        <td>@Model.AppointmentDate.Value.ToShortDateString()</td>
-                        <td>@Model.AppointmentStart.Value.ToShortTimeString()</td>
-                        <td>@Model.AppointmentEnd.Value.ToShortTimeString()</td>
-                        <td>@(Model.PlacesAvailable - Model.NumberOfPatients)</td>
-                        
+                        <td>@Model.appointment.AppointmentId</td>
+                        <td>@Model.appointment.Place.PlaceName</td>
+                        <td>@Model.appointment.Place.Country</td>
+                        <td>@Model.appointment.Place.City</td>
+                        <td>@Model.appointment.AppointmentDate.Value.ToShortDateString()</td>
+                        <td>@Model.appointment.AppointmentStart.Value.ToShortTimeString()</td>
+                        <td>@Model.appointment.AppointmentEnd.Value.ToShortTimeString()</td>
+                        <td>@(Model.appointment.PlacesAvailable - Model.appointment.NumberOfPatients)</td>
+
                     </tr>
-                }
+                </tbody>
+
             </table>
+        </div>
+        <div class="col-lg-12">
+
+            <table id="table" class="table table-bordered table-condensed ">
+                <thead>
+                    <tr><th>Numer w kolejce</th> <th>Przewidywany czas wejścia do gabinetu</th><th>Rezerwacja</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var data in Model.timesofvisit)
+                    {
+                        //change color if appointment hour is booked
+                        if(data.Booked)
+                        {
+                            color = "table-danger";
+                        }
+
+
+                            <tr class=@color >
+                                <td class="danger">@data.NumberInQueue</td>
+                                <td>@data.time.ToShortTimeString()</td>
+                                <td>
+                                    <form asp-controller="Appointment" asp-action="ReserveAppointment">
+                                        <input type="hidden" name="AppointmentId" value="@Model.appointment.AppointmentId" />
+                                        <input type="hidden" name="timeSelected" value="@data.time" />
+                                        <input type="hidden" name="NumberInQueue" value="@data.NumberInQueue" />
+                                        <input type="hidden" name="UserId" value="@Model.UserId" />
+                                        <input type="hidden" name="PatientId" value="@Model.PatientId" />
+                                        @if (data.Booked)
+                                        {
+                                           
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-success">Rezerwuj</button>
+                                        }
+
+
+                                    </form>
+                                </td>
+                            </tr>
+
+                        //reset color
+                           color = "";
+                     
+
+
+                    }
+                </tbody>
+            </table>
+
+
+
+
+
         </div>
     </div>
 </div>
+
+
+@*@section Scripts
+{
+
+    <script type="text/javascript">
+        $('#table').DataTable({
+            // ...
+            "createdRow": function( row, data, dataIndex ) {
+                if (data["Rezerwacja"] == "Zajęty" ) {
+                    $( row ).css( "background-color", "Orange" );
+                    $( row ).addClass( "warning" );
+                }
+            },
+            // ...
+        });
+    </script>
+
+
+
+
+
+
+}*@

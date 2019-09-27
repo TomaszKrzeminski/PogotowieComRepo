@@ -38,8 +38,13 @@
 
                     <a class="nav-item nav-link" @*style="color:white" *@ asp-action="UsersPanel" asp-controller="Home"> @User.Identity.Name </a>
                     <a class="nav-item nav-link" asp-action="LogOut" asp-controller="User">Wyloguj się </a>
-                    <a class="nav-item nav-link" asp-action="Settings" asp-controller="User">Ustawienia </a>
-                    <a class="nav-item nav-link" asp-action="ManageAppointments" asp-controller="Appointment">Wizyty </a>
+
+                    if (User.IsInRole("Doktor"))
+                    {
+                        <a class="nav-item nav-link" asp-action="Settings" asp-controller="User">Ustawienia </a>
+                        <a class="nav-item nav-link" asp-action="ManageAppointments" asp-controller="Appointment">Wizyty </a>
+                    }
+
                     <br />
                     <div>
                         @await Component.InvokeAsync("ShowSpecialization")

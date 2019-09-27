@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PogotowieCom.Models;
 
@@ -21,7 +22,7 @@ namespace PogotowieCom.Controllers
 
         public ViewResult HomePage()
         {
-            HomePageViewModel model = new HomePageViewModel() { Country = "Polska", City = "Bydgoszcz", MedicalSpecialist ="Ginekolog" /*"Wyszukaj specialistę" */};
+            HomePageViewModel model = new HomePageViewModel() { Country = "Polska", City = "Świecie", MedicalSpecialist ="Stomatolog" /*"Wyszukaj specialistę" */};
             return View(model);
         }
         [HttpPost]
@@ -37,6 +38,17 @@ namespace PogotowieCom.Controllers
             }
 
         }
+
+        [Authorize]
+        public ViewResult UsersPanel()
+        {
+            return View();
+        }
+
+
+
+
+
 
 
         public PartialViewResult FindSpecialist(HomePageViewModel model)
