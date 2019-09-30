@@ -60,12 +60,13 @@ namespace PogotowieCom.Models
 
 
 
-    public class Patient 
+    public class Patient
     {
         public int PatientId { get; set; }
         public Patient()
         {
-            //this.Appointments = new HashSet<Appointment>();
+            
+            this.Notifications = new HashSet<Notification>();
         }
 
        
@@ -73,6 +74,9 @@ namespace PogotowieCom.Models
         
         public  AppUser AppUser;
         public IList<PatientAppointment> PatientAppointments { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
+
+
 
     }
    
@@ -96,7 +100,7 @@ namespace PogotowieCom.Models
 
         public ICollection<Appointment> Appointments { get; set; }
 
-        //ICollection<Place> Places { get; set; }
+       
     }
 
     
@@ -127,6 +131,8 @@ namespace PogotowieCom.Models
         public Appointment()
         {
             //this.Patients = new HashSet<Patient>();
+            
+           
         }
 
         public int AppointmentId { get; set; }
@@ -171,11 +177,22 @@ namespace PogotowieCom.Models
         public Place Place { get; set; }
 
 
+       
 
+
+       
     }
 
 
+    public class Notification
+    {
+        public int NotificationId { get; set; }
+        public string NotificationText { get; set; }
+        public bool Checked { get; set; }
 
+        public int? PatientId { get; set; }
+        public Patient Patient { get; set; }
+    }
 
 
     public class Place

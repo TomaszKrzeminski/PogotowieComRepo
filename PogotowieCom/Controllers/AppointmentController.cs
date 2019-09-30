@@ -30,33 +30,38 @@ namespace PogotowieCom.Controllers
             {
                 Appointment appointment = repository.GetAppointmentById(AppointmentId);
                 AppUser user = GetCurrentUserAsync().Result;
-                int PatientId =(int)user.PatientId;
-                model = new ReserveAppointmentViewModel(repository,appointment, user.Id, AppointmentId, PatientId);
+                int PatientId = (int)user.PatientId;
+                model = new ReserveAppointmentViewModel(repository, appointment, user.Id, AppointmentId, PatientId);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return View("Error",null);
+                return View("Error", null);
             }
             return View(model);
 
         }
-        [Authorize(Roles="Pacjent")]
+        [Authorize(Roles = "Pacjent")]
         [HttpPost]
         public IActionResult ReserveAppointment(ReserveAppointmentViewModel model)
         {
 
-           bool check= repository.ReserveAppointment(model);
+            bool check = repository.ReserveAppointment(model);
 
-            if(check)
+            if (check)
             {
+                Subject subject = new Subject();
+                Observer obserwer = new Observer(subject, repository, model.PatientId);
+                subject.MakeNotificationReservedAppointment(model.timeSelected);
+                subject.notifyObservers();
+
                 return RedirectToAction("AppointmentDetails", new { AppointmentId = model.AppointmentId });
             }
             else
             {
                 return View("Error", null);
             }
-            
+
 
         }
 
@@ -65,7 +70,7 @@ namespace PogotowieCom.Controllers
         {
 
             int DoctorId = repository.GetDoctorIdByUserId(model.DoctorId);
-            List<Appointment> list = repository.GetUserAppointments(DoctorId).Where(a=>a.Place.Country==model.Country&&a.Place.City==model.City).ToList();
+            List<Appointment> list = repository.GetUserAppointments(DoctorId).Where(a => a.Place.Country == model.Country && a.Place.City == model.City).ToList();
 
             return View(list);
         }
@@ -73,10 +78,45 @@ namespace PogotowieCom.Controllers
         [Authorize(Roles = "Doktor")]
         public IActionResult ManageAppointments()
         {
-            int DoctorId =(int) GetCurrentUserAsync().Result.DoctorId;
+            int DoctorId = (int)GetCurrentUserAsync().Result.DoctorId;
             List<Appointment> list = repository.GetUserAppointments(DoctorId);
             return View(list);
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Doktor")]
+        public IActionResult RemoveAppointment(int AppointmentId)
+        {
+            Appointment appointment = repository.GetAppointmentByIdAllData(AppointmentId);
+            AppUser user = GetCurrentUserAsync().Result;
+            List<IObserver> observers = new List<IObserver>();
+            List<int> observeresId = appointment.PatientAppointments.Where(a => a.AppointmentId == AppointmentId).Select(id => id.PatientId).ToList();
+            bool check = repository.RemoveAppointment(AppointmentId);
+
+            if (check)
+            {
+                SubjectRemoveAppointment subject = new SubjectRemoveAppointment(appointment, user);
+
+                foreach (var ID in observeresId)
+                {
+                    observers.Add(new Observer(subject, repository, ID));
+                }
+
+
+                subject.MakeNotificationRemoveAppointment(appointment);
+                subject.notifyObservers();
+
+                return RedirectToAction("ManageAppointments");
+            }
+            else
+            {
+                return View("Error", null);
+            }
+
+
+
+        }
+
 
         [Authorize(Roles = "Doktor")]
         public IActionResult AddPlace()
@@ -104,7 +144,7 @@ namespace PogotowieCom.Controllers
         public IActionResult ChoosePlace()
         {
             SelectPlaceViewModel model = new SelectPlaceViewModel();
-            return View("ChoosePlace",model);
+            return View("ChoosePlace", model);
         }
 
 
@@ -123,9 +163,9 @@ namespace PogotowieCom.Controllers
             else
             {
                 List<Place> PlacesList = new List<Place>();
-               
-               
-                return View("ChoosePlace",model);
+
+
+                return View("ChoosePlace", model);
             }
 
         }
@@ -134,9 +174,9 @@ namespace PogotowieCom.Controllers
         public IActionResult AddAppointment(int id = 0)
         {
             AppUser user = GetCurrentUserAsync().Result;
-            int DoctorId =(int)user.DoctorId;
+            int DoctorId = (int)user.DoctorId;
 
-            AddAppointmentViewModel model = new AddAppointmentViewModel() { PlaceId = id, place = repository.GetPlaceById(id),DoctorId=DoctorId };
+            AddAppointmentViewModel model = new AddAppointmentViewModel() { PlaceId = id, place = repository.GetPlaceById(id), DoctorId = DoctorId };
             return View(model);
         }
         [Authorize(Roles = "Doktor")]

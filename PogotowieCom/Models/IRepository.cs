@@ -29,6 +29,12 @@ namespace PogotowieCom.Models
         IQueryable<Place> Places { get; set; }
         IQueryable<Specialization> Specializations { get; }
         List<int> GetBookedAppointments(int AppointmentId);
+        bool AddNotificationToPatient(int PatientId, Notification notification);
+        List<Notification> GetNotifications(int PatientId, bool Checked);
+        Patient GetPatientById(int PatientId);
+        bool ChangeNotificationToChecked(int NotificationId,string UserId);
+        bool RemoveAppointment(int AppointmentId);
+        Appointment GetAppointmentByIdAllData(int AppointmentId);
     }
 
 
@@ -47,6 +53,23 @@ namespace PogotowieCom.Models
             this.context = context;
             userManager = userMgr;
         }
+
+
+        public bool ChangeNotificationToChecked(int NotificationId,string UserId)
+        {
+            try
+            {
+                Notification notification = context.Users.Include(p=>p.Patient).ThenInclude(n=>n.Notifications).Where(u => u.Id == UserId).First().Patient.Notifications.Where(n => n.NotificationId == NotificationId).First();
+                notification.Checked = true;
+                context.SaveChanges();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
+
 
         public bool AddPatientToUser(Patient patient, string Email)
         {
@@ -411,7 +434,7 @@ namespace PogotowieCom.Models
         {
             try
             {
-                Appointment appointment=context.Appointments.Include(d=>d.PatientAppointments).Where(a=>a.AppointmentId==model.AppointmentId).First();
+                Appointment appointment = context.Appointments.Include(d => d.PatientAppointments).Where(a => a.AppointmentId == model.AppointmentId).First();
                 appointment.NumberOfPatients += 1;
                 Patient patient = context.Patients.Where(a => a.PatientId == model.PatientId).First();
                 PatientAppointment patientappointment = new PatientAppointment();
@@ -419,13 +442,13 @@ namespace PogotowieCom.Models
                 patientappointment.Patient = patient;
                 patientappointment.NumberInQueue = model.NumberInQueue;
                 appointment.PatientAppointments.Add(patientappointment);
-                
+
 
                 context.SaveChanges();
                 return true;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -438,14 +461,14 @@ namespace PogotowieCom.Models
             try
             {
 
-                Appointment appointment = context.Appointments.Include(x => x.PatientAppointments).Where(a=>a.AppointmentId == AppointmentId).First();
+                Appointment appointment = context.Appointments.Include(x => x.PatientAppointments).Where(a => a.AppointmentId == AppointmentId).First();
                 foreach (var a in appointment.PatientAppointments)
                 {
                     list.Add((int)a.NumberInQueue);
                 }
                 return list;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return list;
             }
@@ -453,7 +476,104 @@ namespace PogotowieCom.Models
 
 
         }
+
+        public bool AddNotificationToPatient(int PatientId, Notification notification)
+        {
+            try
+            {
+
+                Patient patient = context.Patients.Include(n => n.Notifications).Where(p => p.PatientId == PatientId).First();
+                patient.Notifications.Add(notification);
+                context.SaveChanges();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public List<Notification> GetNotifications(int PatientId, bool Checked)
+        {
+            try
+            {
+                List<Notification> list = context.Patients.Include(n => n.Notifications).Where(p => p.PatientId == PatientId).First().Notifications.ToList();
+                if (Checked)
+                {
+                   
+                    return list;
+                }
+                else
+                {
+                    list = list.Where(n => n.Checked == Checked).ToList();
+                    return list;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new List<Notification>();
+            }
+        }
+
+        public Patient GetPatientById(int PatientId)
+        {
+            try
+            {
+
+                return context.Patients.Find(PatientId);
+
+            }
+            catch(Exception ex)
+            {
+                return new Patient();
+            }
+        }
+
+        public bool RemoveAppointment(int AppointmentId)
+        {
+            try
+            {
+
+                Appointment appointment = context.Appointments.Find(AppointmentId);
+                context.Appointments.Remove(appointment);
+                context.SaveChanges();
+
+
+                //Appointment appointment = context.Appointments.Include(d => d.Doctor).Include(pa => pa.PatientAppointments).Where(a => a.AppointmentId == AppointmentId).First();
+
+                //PatientAppointment patientappointment = appointment.PatientAppointments.Where(pa => pa.AppointmentId == AppointmentId).First();
+
+                //appointment.PatientAppointments.Remove(patientappointment);
+
+                //context.SaveChanges();
+
+                return true;
+
+
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public Appointment GetAppointmentByIdAllData(int AppointmentId)
+        {
+            try
+            {
+                Appointment appointment = context.Appointments.Include(pa => pa.PatientAppointments).Where(a => a.AppointmentId == AppointmentId).First();
+                return appointment;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
     }
 
 
 }
+
+

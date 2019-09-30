@@ -12,16 +12,27 @@
     </div>
     <div class="col-lg-12">
         <table class="table table-bordered">
-            <thead><tr><th>Nr Wizyty</th><th>Miejsce</th><th>Data</th><th>Godzina Rozpoczęcia</th><th>Pozostało wolnych miejsc</th></tr></thead>
+            <thead><tr><th>Nr Wizyty</th><th>Miejsce</th><th>Data</th><th>Godzina Rozpoczęcia</th><th>Pozostało wolnych miejsc</th><th></th></tr></thead>
             @foreach (var appointment in Model)
             {
                 <tr>
-                    <td>@appointment.AppointmentId</td><td>@appointment.Place.PlaceName</td><td>@appointment.AppointmentDate.Value.ToShortDateString()</td><td>@appointment.AppointmentStart.Value.ToShortTimeString()</td><td>@(appointment.PlacesAvailable-appointment.NumberOfPatients)</td>
+                    <td>@appointment.AppointmentId</td>
+                    <td>@appointment.Place.PlaceName</td>
+                    <td>@appointment.AppointmentDate.Value.ToShortDateString()</td>
+                    <td>@appointment.AppointmentStart.Value.ToShortTimeString()</td>
+                    <td>@(appointment.PlacesAvailable - appointment.NumberOfPatients)</td>
+                    <td>
+                        <form method="post" asp-action="RemoveAppointment" asp-controller="Appointment">
+                            <input type="hidden" name="AppointmentId" value="@appointment.AppointmentId" />
+                            <button class="btn btn-danger" type="submit">Usuń</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </table>
     </div>
     <div class="col-lg-12">
-        <a class="btn btn-primary" asp-controller="Appointment"  asp-action="ChoosePlace">Dodaj Wizytę</a>
+        <a class="btn btn-primary" asp-controller="Appointment" asp-action="ChoosePlace">Dodaj Wizytę</a>
     </div>
 </div>
+

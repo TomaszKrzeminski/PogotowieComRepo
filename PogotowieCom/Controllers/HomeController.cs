@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PogotowieCom.Models;
 
@@ -13,16 +14,18 @@ namespace PogotowieCom.Controllers
     {
 
         IRepository repository;
+        private UserManager<AppUser> userManager;
 
-        public HomeController(IRepository repo)
+        public HomeController(IRepository repo, UserManager<AppUser> userManager)
         {
+            this.userManager = userManager;
             repository = repo;
         }
-
+        private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
 
         public ViewResult HomePage()
         {
-            HomePageViewModel model = new HomePageViewModel() { Country = "Polska", City = "Świecie", MedicalSpecialist ="Stomatolog" /*"Wyszukaj specialistę" */};
+            HomePageViewModel model = new HomePageViewModel() { Country = "Polska", City = "Świecie", MedicalSpecialist = "Stomatolog" /*"Wyszukaj specialistę" */};
             return View(model);
         }
         [HttpPost]
@@ -39,10 +42,26 @@ namespace PogotowieCom.Controllers
 
         }
 
+
+        public IActionResult NotificationChecked(int id)
+        {
+            AppUser user = GetCurrentUserAsync().Result;
+
+            repository.ChangeNotificationToChecked(id, user.Id);
+
+            return  RedirectToAction("HomePage");
+        }
+
+
+
         [Authorize]
         public ViewResult UsersPanel()
         {
-            return View();
+            UsersAccountViewModel model = new UsersAccountViewModel();
+            AppUser user = GetCurrentUserAsync().Result;
+            model.NotificationList = repository.GetNotifications((int)user.PatientId, true);
+
+            return View(model);
         }
 
 
@@ -55,7 +74,7 @@ namespace PogotowieCom.Controllers
         {
 
             SearchDoctorViewModel doctormodel = repository.SearchForDoctor(model);
-            
+
 
             return PartialView(doctormodel);
         }

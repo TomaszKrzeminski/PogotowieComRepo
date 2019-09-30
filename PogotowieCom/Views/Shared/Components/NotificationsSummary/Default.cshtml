@@ -1,0 +1,21 @@
+﻿@model List<Notification>
+
+
+
+<form asp-action="NotificationChecked" asp-controller="Home">
+    @foreach (var notification in Model)
+    {
+
+        <div Click="SubmitFunction()" class="text-center col-lg-12">
+           
+            <a class="h1 alert-danger" asp-action="NotificationChecked" asp-controller="Home" asp-route-id=" @notification.NotificationId">@notification.NotificationText</a> 
+        </div>
+               
+     
+    }
+</form>
+
+     
+
+
+       
