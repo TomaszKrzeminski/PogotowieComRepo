@@ -12,8 +12,8 @@ namespace PogotowieCom.Models
     {
 
         void update(Notification notification);
-        List<Notification> GetAllNotifications();
-        List<Notification> GetNotCheckedNotifications();
+        //List<Notification> GetAllNotifications();
+        //List<Notification> GetNotCheckedNotifications();
     }
 
     public interface ISubject
@@ -46,15 +46,15 @@ namespace PogotowieCom.Models
             repository.AddNotificationToPatient(Patient.PatientId, notification);
         }
 
-       public List<Notification>  GetAllNotifications()
-        {
-            return repository.GetNotifications(Patient.PatientId, false);
-        }
+       //public List<Notification>  GetAllNotifications()
+       // {
+       //     return repository.GetNotifications(Patient.PatientId, false);
+       // }
 
-       public   List<Notification> GetNotCheckedNotifications()
-        {
-            return repository.GetNotifications(Patient.PatientId, true);
-        }
+       //public   List<Notification> GetNotCheckedNotifications()
+       // {
+       //     return repository.GetNotifications(Patient.PatientId, true);
+       // }
 
     }
 

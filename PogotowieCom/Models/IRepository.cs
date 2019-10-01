@@ -9,6 +9,7 @@ namespace PogotowieCom.Models
 {
     public interface IRepository
     {
+        List<Tag> GetTagsSpecialist(string SpecialistName);
         int GetDoctorIdByUserId(string UserId);
         bool AddPatientToUser(Patient patient, string Email);
         bool AddDoctorToUser(Doctor doctor, string Email);
@@ -565,6 +566,20 @@ namespace PogotowieCom.Models
             {
                 Appointment appointment = context.Appointments.Include(pa => pa.PatientAppointments).Where(a => a.AppointmentId == AppointmentId).First();
                 return appointment;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public List<Tag> GetTagsSpecialist(string SpecialistName)
+        {
+            try
+            {
+
+
+
             }
             catch(Exception ex)
             {
