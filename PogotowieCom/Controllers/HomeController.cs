@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PogotowieCom.Models;
-
+using static PogotowieCom.Models.Specialist;
 
 namespace PogotowieCom.Controllers
 {
@@ -42,6 +42,8 @@ namespace PogotowieCom.Controllers
 
         }
 
+        
+
 
         public IActionResult NotificationChecked(int id)
         {
@@ -49,7 +51,7 @@ namespace PogotowieCom.Controllers
 
             repository.ChangeNotificationToChecked(id, user.Id);
 
-            return  RedirectToAction("HomePage");
+            return RedirectToAction("HomePage");
         }
 
 
@@ -73,6 +75,42 @@ namespace PogotowieCom.Controllers
         public PartialViewResult FindSpecialist(HomePageViewModel model)
         {
 
+
+            if(model.Ailments!=null&&model.Ailments.Count()>0)
+            {
+                Specialist ginekolg = new Ginekolog(repository);
+                Specialist stomatolog = new Stomatolog(repository);
+                Specialist ortopeda = new Ortopeda(repository);
+
+
+                ginekolg.setNumber(stomatolog);
+                stomatolog.setNumber(ortopeda);
+
+
+
+                ginekolg.ForwardRequest(model.Ailments);
+                List<string> listofspecialist = ortopeda.GetSpecialistsNames().Distinct().ToList();
+
+                SearchDoctorViewModel DoctorModel = new SearchDoctorViewModel();
+                HomePageViewModel Model = model;
+
+                for (int i=0;i<listofspecialist.Count();i++)
+                {
+                    Model.MedicalSpecialist = listofspecialist[i];
+                    DoctorModel.Users.AddRange( repository.SearchForDoctor(Model).Users);
+                }
+
+                DoctorModel.Users.Distinct(new UserComparer());
+
+                return PartialView(DoctorModel);
+
+
+            }
+
+
+
+
+
             SearchDoctorViewModel doctormodel = repository.SearchForDoctor(model);
 
 
@@ -92,10 +130,52 @@ namespace PogotowieCom.Controllers
         }
 
 
+        //public IActionResult GetTags(List<Tag> Ailments)
+        //{
+        //    List<Tag> Tags = new List<Tag>();
 
-        public ViewResult FindAilment(string Ailment)
+
+        //    return RedirectToAction("FindAilment", new { Ailments });
+        //}
+
+        public List<string> MakeTags(string Ailment)
         {
-            return View();
+            List<string> list = new List<string>();
+
+
+
+
+            return list;
+        }
+
+
+
+
+
+
+        public PartialViewResult FindAilment(List<Tag> Ailments)
+
+        {
+            
+
+            Specialist ginekolg = new Ginekolog(repository);
+            Specialist stomatolog = new Stomatolog(repository);
+            Specialist ortopeda = new Ortopeda(repository);
+
+
+            ginekolg.setNumber(stomatolog);
+            stomatolog.setNumber(ortopeda);
+
+
+
+            ginekolg.ForwardRequest(Ailments);
+            List<string> listofspecialist = ortopeda.GetSpecialistsNames();
+
+
+
+            SearchDoctorViewModel doctormodel = repository.SearchForDoctor(new HomePageViewModel());
+            return PartialView("FindSpecialist",doctormodel);
+
         }
 
 

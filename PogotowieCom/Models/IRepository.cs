@@ -9,7 +9,7 @@ namespace PogotowieCom.Models
 {
     public interface IRepository
     {
-        List<Tag> GetTagsSpecialist(string SpecialistName);
+        List<Tag> GetTagsSpecialist(Specialist specialist);
         int GetDoctorIdByUserId(string UserId);
         bool AddPatientToUser(Patient patient, string Email);
         bool AddDoctorToUser(Doctor doctor, string Email);
@@ -33,9 +33,10 @@ namespace PogotowieCom.Models
         bool AddNotificationToPatient(int PatientId, Notification notification);
         List<Notification> GetNotifications(int PatientId, bool Checked);
         Patient GetPatientById(int PatientId);
-        bool ChangeNotificationToChecked(int NotificationId,string UserId);
+        bool ChangeNotificationToChecked(int NotificationId, string UserId);
         bool RemoveAppointment(int AppointmentId);
         Appointment GetAppointmentByIdAllData(int AppointmentId);
+        List<AppUser> GetFilteredUsers(SearchObject obj);
     }
 
 
@@ -56,16 +57,16 @@ namespace PogotowieCom.Models
         }
 
 
-        public bool ChangeNotificationToChecked(int NotificationId,string UserId)
+        public bool ChangeNotificationToChecked(int NotificationId, string UserId)
         {
             try
             {
-                Notification notification = context.Users.Include(p=>p.Patient).ThenInclude(n=>n.Notifications).Where(u => u.Id == UserId).First().Patient.Notifications.Where(n => n.NotificationId == NotificationId).First();
+                Notification notification = context.Users.Include(p => p.Patient).ThenInclude(n => n.Notifications).Where(u => u.Id == UserId).First().Patient.Notifications.Where(n => n.NotificationId == NotificationId).First();
                 notification.Checked = true;
                 context.SaveChanges();
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -267,8 +268,8 @@ namespace PogotowieCom.Models
             SearchDoctorViewModel modelSearch = new SearchDoctorViewModel();
             try
             {
-                List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).ToList();
-                //List<Doctor>   list = context.Users.Include(d=>d.DoctorSpecializations).Where(d => d.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).ToList();
+                //List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).ToList();
+                List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).Where(x=>x.City==model.City).ToList();
                 if (list != null)
                 {
                     modelSearch.Users = list;
@@ -502,7 +503,7 @@ namespace PogotowieCom.Models
                 List<Notification> list = context.Patients.Include(n => n.Notifications).Where(p => p.PatientId == PatientId).First().Notifications.ToList();
                 if (Checked)
                 {
-                   
+
                     return list;
                 }
                 else
@@ -526,7 +527,7 @@ namespace PogotowieCom.Models
                 return context.Patients.Find(PatientId);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new Patient();
             }
@@ -554,7 +555,7 @@ namespace PogotowieCom.Models
 
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -567,23 +568,41 @@ namespace PogotowieCom.Models
                 Appointment appointment = context.Appointments.Include(pa => pa.PatientAppointments).Where(a => a.AppointmentId == AppointmentId).First();
                 return appointment;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
         }
 
-        public List<Tag> GetTagsSpecialist(string SpecialistName)
+        public List<Tag> GetTagsSpecialist(Specialist specialist)
+        {
+            List<Tag> TagList = new List<Tag>();
+            string name = specialist.GetNameOfSpecialization();
+            try
+            {
+                Specialization specialization = context.Specializations.Include(s => s.TagSpecializations).ThenInclude(s=>s.Tag).Where(x=>x.Name==name).First();
+                TagList = specialization.TagSpecializations.Select(z => z.Tag).ToList();
+                
+                return TagList;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public List<AppUser> GetFilteredUsers(SearchObject obj)
         {
             try
             {
 
+                List<AppUser> Users=context.Users.Include(d=>d.Doctor).Where(x=>x.City==obj.UsersFiltering)
 
 
             }
             catch(Exception ex)
             {
-                return null;
+                return new List<AppUser>();
             }
         }
     }

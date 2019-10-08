@@ -18,12 +18,16 @@ namespace PogotowieCom.Models
 
         }
 
+        public AppIdentityDbContext()
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<PatientAppointment>().HasKey(sc => new { sc.PatientId, sc.AppointmentId });
             modelBuilder.Entity<DoctorSpecialization>().HasKey(sc => new { sc.DoctorId, sc.SpecializationId });
+            modelBuilder.Entity<TagSpecialization>().HasKey(sc => new { sc.SpecializationId, sc.TagId });
         }
 
 
@@ -33,8 +37,11 @@ namespace PogotowieCom.Models
         public DbSet<Specialization> Specializations { get; set; }
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Patient> Patients { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<TagSpecialization> TagSpecializations { get; set; }
 
-       
+
+
 
 
     }

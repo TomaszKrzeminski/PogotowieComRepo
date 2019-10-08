@@ -6,93 +6,171 @@ using System.Threading.Tasks;
 namespace PogotowieCom.Models
 {
 
-    public class Tag
-    {
-        public int TagId { get; set; }
-        public string Text { get; set; }
 
-
-    }
 
 
     public abstract class Specialist
     {
         protected bool Check { get; set; } = false;
         protected Specialist specialist;
-        protected Repository repository;
+        protected IRepository repository;
 
-        public Specialist(Repository repository)
+        public List<Specialist> specialists { get; set; }
+
+        public Specialist(IRepository repository)
         {
             this.repository = repository;
+            this.specialists = new List<Specialist>();
         }
 
-        
+
+        public List<string> GetSpecialistsNames()
+        {
+            List<string> Names = new List<string>();
+            if (specialists != null && specialists.Count() > 0)
+            {
+                foreach (var specialist in specialists)
+                {
+                    Names.Add(specialist.GetNameOfSpecialization());
+                }
+            }
+            return Names;
+        }
+
+        public abstract string GetNameOfSpecialization();
 
         public void setNumber(Specialist specialist)
         {
             this.specialist = specialist;
         }
 
-        public abstract void ForwardRequest(List<Tag> taglist,List<string> Names);
-
-        public bool CompareTags(List<Tag> list, List<Tag> listToCompare)
+        public void ForwardRequest(List<Tag> taglist)
         {
 
+            taglist.RemoveAll(t => t.Text == null);
 
-            if (list != null && list.Count > 0 && listToCompare != null && listToCompare.Count > 0)
+            List<Tag> SpecialistListOfTags = repository.GetTagsSpecialist(this);
+
+            foreach (var item in taglist)
             {
-                foreach (var Tag in list)
-                {
 
-                    foreach (var TagCompare in listToCompare)
+                {
+                    if (String.IsNullOrEmpty(item.Text))
+                    {
+                      Tag tag=   taglist.Where(t => t.Text == item.Text).First();
+                        taglist.Remove(tag);
+                    }
+                }
+
+
+                Check = CompareTags(taglist, SpecialistListOfTags);
+
+                if (Check)
+                {
+                    specialists.Add(this);
+                }
+
+                if (specialist != null)
+                {
+                    specialist.specialists = specialists;
+                    specialist.ForwardRequest(taglist);
+                }
+
+
+            }
+
+
+
+
+            bool CompareTags(List<Tag> userTags, List<Tag> specialistTags)
+            {
+
+
+                if (userTags != null && userTags.Count > 0 && specialistTags != null && specialistTags.Count > 0)
+                {
+                    foreach (var TagU in userTags)
                     {
 
-                        if (Tag.Text.ToLower() == TagCompare.Text.ToLower())
+                        foreach (var TagS in specialistTags)
                         {
-                            return true;
+
+                            string[] userStrings = PrepareTag(TagU);
+                            string[] specialistString = PrepareTag(TagS);
+
+                            if (userStrings.All(us => specialistString.Contains(us)))
+                            {
+                                return true;
+                            }
+
                         }
 
                     }
-
                 }
+                return false;
             }
-            return false;
-        }
-    }
 
-    "Ginekolog", "Stomatolog", "Ortopeda", "Chirurg", "Dermatolog", "Psychiatra", "Psycholog", "Internista", "Laryngolog", "Okulista", "Neurolog", "Fizjoterapeuta", "Urolog", "Sexuolog", "Alergolog",  "Ortopeda", "Chirurg Szczękowy", "Lekarz Sportowy" 
-
-    public class Ginekolog : Specialist
-    {
-        public Ginekolog(Repository repository) : base(repository)
-        {
-
-        }
-
-        public int GinekologId { get; set; }
-
-
-        
-
-        public override void  ForwardRequest(List<Tag> taglist,List<string> names) 
-        {
-
-            List<Tag> SpecialistListOfTags = repository.GetTagsSpecialist();
-
-
-          Check=CompareTags(taglist, SpecialistListOfTags);
-
-            if (Check)
+            string[] PrepareTag(Tag tag)
             {
-                names.Add(this.GetType().ToString());
+                string[] Text = tag.Text.ToLower().Split();
+
+                return Text;
+
+
             }
-           
-            specialist.ForwardRequest(taglist,names);
+
+
         }
+
+        //"Ginekolog", "Stomatolog", "Ortopeda", "Chirurg", "Dermatolog", "Psychiatra", "Psycholog", "Internista", "Laryngolog", "Okulista", "Neurolog", "Fizjoterapeuta", "Urolog", "Sexuolog", "Alergolog",  "Ortopeda", "Chirurg Szczękowy", "Lekarz Sportowy" 
+
+        public class Ginekolog : Specialist
+        {
+            public Ginekolog(IRepository repository) : base(repository)
+            {
+
+            }
+
+
+
+            public override string GetNameOfSpecialization()
+            {
+                return "Ginekolog";
+            }
+        }
+
+
+        public class Stomatolog : Specialist
+        {
+            public Stomatolog(IRepository repository) : base(repository)
+            {
+
+            }
+
+
+
+            public override string GetNameOfSpecialization()
+            {
+                return "Stomatolog";
+            }
+        }
+
+
+        public class Ortopeda : Specialist
+        {
+            public Ortopeda(IRepository repository) : base(repository)
+            {
+
+            }
+
+
+
+            public override string GetNameOfSpecialization()
+            {
+                return "Ortopeda";
+            }
+        }
+
+
     }
-
-
-
-
 }
 

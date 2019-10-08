@@ -16,8 +16,9 @@ namespace PogotowieCom.Models
         [Required]
         public string Country { get; set; }
         public List<string> BodyParts { get; set; }
-        public List<string> Aliments { get; set; }
+        
         public List<string> MedicalSpecialists { get; set; }
+        public List<Tag> Ailments { get; set; }
     }
 
     public class MedicalSpecialistSummary:ViewComponent

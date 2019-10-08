@@ -26,16 +26,21 @@ namespace PogotowieCom.Models
         public void x()
         {
             AppUser user = new AppUser();
-            
+
         }
+
+
+
+
+
 
 
 
     }
 
-   
-    
-    
+
+
+
 
     public class PatientAppointment
     {
@@ -65,32 +70,32 @@ namespace PogotowieCom.Models
         public int PatientId { get; set; }
         public Patient()
         {
-            
+
             this.Notifications = new HashSet<Notification>();
         }
 
-       
 
-        
-        public  AppUser AppUser;
+
+
+        public AppUser AppUser;
         public IList<PatientAppointment> PatientAppointments { get; set; }
         public ICollection<Notification> Notifications { get; set; }
 
 
 
     }
-   
-    public class Doctor 
+
+    public class Doctor
     {
         public int DoctorId { get; set; }
         public Doctor()
         {
-            
+
             this.Appointments = new HashSet<Appointment>();
             this.DoctorSpecializations = new HashSet<DoctorSpecialization>();
-          
+
         }
-                         
+
 
         public decimal? PriceForVisit { get; set; }
 
@@ -100,10 +105,10 @@ namespace PogotowieCom.Models
 
         public ICollection<Appointment> Appointments { get; set; }
 
-       
+
     }
 
-    
+
 
 
 
@@ -113,14 +118,43 @@ namespace PogotowieCom.Models
         public Specialization()
         {
             this.DoctorSpecializations = new HashSet<DoctorSpecialization>();
-        }
+            this.TagSpecializations = new HashSet<TagSpecialization>();
+    }
 
         public int SpecializationId { get; set; }
         public string Name { get; set; }
 
         public ICollection<DoctorSpecialization> DoctorSpecializations { get; set; }
+        public ICollection<TagSpecialization> TagSpecializations { get; set; }
     }
 
+    public class Tag
+    {
+
+        public Tag()
+        {
+            this.TagSpecializations = new HashSet<TagSpecialization>();
+        }
+
+        public int TagId { get; set; }
+        public string Text { get; set; }
+
+        public ICollection<TagSpecialization> TagSpecializations { get; set; }
+    }
+
+
+
+    public class TagSpecialization
+    {
+       
+
+        public int SpecializationId { get; set; }
+        public Specialization Specialization { get; set; }
+
+        public int TagId { get; set; }
+        public Tag Tag { get; set; }
+
+    }
 
 
 
@@ -131,25 +165,25 @@ namespace PogotowieCom.Models
         public Appointment()
         {
             //this.Patients = new HashSet<Patient>();
-            
-           
+
+
         }
 
         public int AppointmentId { get; set; }
-      
-        [Required(ErrorMessage ="Proszę podać datę")]
+
+        [Required(ErrorMessage = "Proszę podać datę")]
         //[Display(Name="Data")]
         [DataType(DataType.Date)]
         public DateTime? AppointmentDate { get; set; }
 
-        
+
         [Display(Name = "Czas rozpoczęcia ")]
         [Required(ErrorMessage = "Proszę podać czas rozpoczęcia przyjmowania pacjentów")]
         //[DataType(DataType.Time)]
         public DateTime? AppointmentStart { get; set; }
 
 
-       
+
         [Required(ErrorMessage = "Proszę podać czas zakończenia przyjmowania pacjentów")]
         [TimeMustBeLater("AppointmentStart")]
         [DataType(DataType.Time)]
@@ -159,11 +193,11 @@ namespace PogotowieCom.Models
         [Required(ErrorMessage = "Proszę podać ilość miejsc")]
         public int? PlacesAvailable { get; set; }
 
-       
+
         public int? NumberOfPatients { get; set; }
 
         [Display(Name = "Cena za wizytę ")]
-        [Range(20,1000)]
+        [Range(20, 1000)]
         [Required(ErrorMessage = "Proszę podać cenę za wizytę")]
         public decimal? VisitPrice { get; set; }
 
@@ -177,10 +211,10 @@ namespace PogotowieCom.Models
         public Place Place { get; set; }
 
 
-       
 
 
-       
+
+
     }
 
 
@@ -204,7 +238,7 @@ namespace PogotowieCom.Models
         }
 
         public int PlaceId { get; set; }
-        [Required(ErrorMessage ="Nazwa jest wymagana")]
+        [Required(ErrorMessage = "Nazwa jest wymagana")]
         public string PlaceName { get; set; }
         [Required(ErrorMessage = "Nazwa kraju jest wymagana")]
         public string Country { get; set; }
@@ -217,7 +251,7 @@ namespace PogotowieCom.Models
         [Required(ErrorMessage = "Numer pokoju jest wymagany")]
         public int? Room { get; set; }
 
-       public ICollection<Appointment> Appointments { get; set; }
+        public ICollection<Appointment> Appointments { get; set; }
 
         //public int DoctorId { get; set; }
         //public Doctor Doctor { get; set; }

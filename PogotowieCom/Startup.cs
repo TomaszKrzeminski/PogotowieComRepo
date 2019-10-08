@@ -55,7 +55,7 @@ namespace PogotowieCom
 
             });
 
-            SeedAdmin.EnsurePopulated(context);
+           Seed.EnsurePopulated(context);
         }
     }
 }
