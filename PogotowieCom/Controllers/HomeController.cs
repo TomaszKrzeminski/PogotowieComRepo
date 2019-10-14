@@ -44,6 +44,45 @@ namespace PogotowieCom.Controllers
 
         
 
+        public IActionResult AdvancedSearch()
+        {
+            AdvancedSearchViewModel model = new AdvancedSearchViewModel();
+           
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult AdvancedSearch(AdvancedSearchViewModel  model)
+        {
+
+            if (ModelState.IsValid)
+            {
+                Search search = new Search(model, repository);
+                search.Check();
+                search.Filtr();
+                search.Check();
+                search.Filtr();
+                search.Check();
+                search.Filtr();
+                search.Check();
+                search.Filtr();
+                search.Check();
+                search.Filtr();
+
+                model.UserList = search.Users;
+
+                return View(model);
+            }
+            else
+            {
+                return View(model);
+            }
+
+
+            
+        }
+
 
         public IActionResult NotificationChecked(int id)
         {
@@ -130,13 +169,7 @@ namespace PogotowieCom.Controllers
         }
 
 
-        //public IActionResult GetTags(List<Tag> Ailments)
-        //{
-        //    List<Tag> Tags = new List<Tag>();
-
-
-        //    return RedirectToAction("FindAilment", new { Ailments });
-        //}
+       
 
         public List<string> MakeTags(string Ailment)
         {

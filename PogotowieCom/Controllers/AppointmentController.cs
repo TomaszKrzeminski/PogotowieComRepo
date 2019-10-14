@@ -75,6 +75,15 @@ namespace PogotowieCom.Controllers
             return View(list);
         }
 
+        public IActionResult ShowAppointmentsAdvanced(ShowAppointmentViewModel model)
+        {
+
+            int DoctorId = repository.GetDoctorIdByUserId(model.DoctorId);
+            List<Appointment> list = repository.GetUserAppointments(DoctorId);
+
+            return View("ShowAppointments",list);
+        }
+
         [Authorize(Roles = "Doktor")]
         public IActionResult ManageAppointments()
         {

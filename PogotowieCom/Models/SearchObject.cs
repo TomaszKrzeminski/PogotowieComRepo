@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PogotowieCom.Models;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,58 +9,80 @@ namespace PogotowieCom.Models
 {
     public abstract class SearchObject
     {
-        Repository repository;
-        public SearchObject(Repository repository)
-        {
-            this.repository = repository;
-        }
-            
+        protected IRepository repository;
 
-        public List<AppUser> Users { get; set; }
+
 
         public List<string> Filtering { get; set; }
 
-        public Func<AppUser, bool> FilteringType;
+     
 
-        public abstract void Modification();
-
-        public  List<AppUser> GetUsers()
+        public virtual void Modification()
         {
-            return Users;
+
         }
 
-        public abstract void UsersFiltering();
-       
+        public virtual Func<AppUser, bool> FiltrUser(Func<AppUser, bool> filtr=null)
+        {
+
+            Func<AppUser, bool> FilteringType=(AppUser user)=>true;
+
+            return FilteringType;
+          
+
+
+        }
+
+        public virtual bool Check()
+        {
+            return false;
+        }
+
+        public virtual bool Filtr(AppUser user)
+        {
+            return false;
+        }
 
     }
 
 
     public class SearchDoctor : SearchObject
     {
-       
-        public SearchDoctor(Repository repository):base(repository)
+        public SearchDoctor()
         {
 
         }
+
+        public SearchDoctor(IRepository repository)
+        {
+
+        }
+
+
 
         public override void Modification()
         {
             Filtering.Add("Filtrowanie Specialistów");
         }
 
-        public override void UsersFiltering()
-        {
-           
-        }
+
     }
 
 
     public class SearchPatient : SearchObject
     {
-        public SearchPatient(Repository repository) : base(repository)
+
+        public SearchPatient()
         {
 
         }
+
+
+        public SearchPatient(IRepository repository)
+        {
+
+        }
+
 
 
         public override void Modification()
@@ -66,10 +90,7 @@ namespace PogotowieCom.Models
             Filtering.Add("Filtrowanie Pacjentów");
         }
 
-        public override void UsersFiltering()
-        {
-            
-        }
+
     }
 
 
@@ -77,22 +98,22 @@ namespace PogotowieCom.Models
 
     public abstract class SearchDecorator : SearchObject
     {
-
-        SearchPatient
-
-        public override void Modification()
+        SearchObject searchobj;
+        public SearchDecorator()
         {
-            throw new NotImplementedException();
+
+        }
+        public SearchDecorator(IRepository repository, SearchObject searchobj)
+        {
+            this.searchobj = searchobj;
+           
         }
 
 
-       
 
-        public override void UsersFiltering()
-        {
-            
-        }
-       
+
+
+
     }
 
 
@@ -101,21 +122,29 @@ namespace PogotowieCom.Models
 
 
 
-    public class SearchDecoratorCity:SearchDecorator
+    public class SearchDecoratorCity : SearchDecorator
     {
         SearchObject searchobj;
-        string City;
+        public string City { get; set; }
 
-        public SearchDecoratorCity(SearchObject obj,string City)
+
+        public SearchDecoratorCity()
         {
-            searchobj = obj;
+
+        }
+
+        public SearchDecoratorCity(IRepository repository, SearchObject obj, string City) : base(repository, obj)
+        {
             this.City = City;
+            this.repository = repository;
+            searchobj = obj;
+
         }
 
 
-        bool Filtr(AppUser user)
+        public override bool Filtr(AppUser user)
         {
-            if(user.City==City)
+            if (user.City == City)
             {
                 return true;
             }
@@ -126,34 +155,252 @@ namespace PogotowieCom.Models
         }
 
 
-        public override void UsersFiltering()
+        public override Func<AppUser, bool> FiltrUser(Func<AppUser, bool> filtr)
         {
-
-            if (Users != null && Users.Count > 0)
+            if (Check())
             {
-                Users = Users.Where(Filtr).ToList();
+                Func<AppUser, bool> FiltrUser= searchobj.FiltrUser();
+                FiltrUser += Filtr;
+
+                return FiltrUser;
             }
+            else
+            {
+                return searchobj.FiltrUser();
 
+            }
+        }
 
-          
+        public override bool Check()
+        {
+            if (String.IsNullOrWhiteSpace(City))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
 
     }
 
-    public class SearchDecoratorSpecialization
+    public class SearchDecoratorSpecialization : SearchDecorator
     {
 
-    }
+        public SearchDecoratorSpecialization()
+        {
 
-    public class SearchDecoratorAppointmentDate
-    {
+        }
 
-    }
+        SearchObject searchobj;
+        public string Specialization { get; set; }
 
-    public class SearchDecoratorAppointmentHour
-    {
 
+        public SearchDecoratorSpecialization(IRepository repository, SearchObject obj, string Specialization) : base(repository, obj)
+        {
+            this.Specialization = Specialization;
+           
+            this.repository = repository;
+            searchobj = obj;
+
+        }
+
+
+        public override bool Filtr(AppUser user)
+        {
+            if (user.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == Specialization).Any())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        public override Func<AppUser, bool> FiltrUser(Func<AppUser, bool> filtr)
+        {
+
+            if (Check())
+            {
+                Func<AppUser, bool> FiltrUser = searchobj.FiltrUser();
+                FiltrUser += Filtr;
+
+                return FiltrUser;
+            }
+            else
+            {
+                return searchobj.FiltrUser();
+
+            }
+
+
+
+
+        }
+
+
+        public override bool Check()
+        {
+
+            if (String.IsNullOrWhiteSpace(Specialization))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+
+        }
     }
 
 }
+
+//public class SearchDecoratorAppointmentDate : SearchDecorator
+//{
+//    [DataType(DataType.Date)]
+//    public DateTime? Date { get; set; }
+//    SearchObject searchobj;
+
+
+
+//    public SearchDecoratorAppointmentDate()
+//    {
+
+//    }
+
+
+
+//    public SearchDecoratorAppointmentDate(IRepository repository, SearchObject obj, DateTime? Date) : base(repository, obj)
+//    {
+//        this.Date = Date;
+//        FilteringType = Filtr;
+//        this.repository = repository;
+//        searchobj = obj;
+
+//    }
+
+
+//    public override bool Filtr(AppUser user)
+//    {
+//        if (true)
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            return false;
+//        }
+//    }
+
+//    public override bool Check()
+//    {
+//        if (Date != null)
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            return false;
+//        }
+//    }
+
+
+
+
+//    public override void UsersFiltering()
+//    {
+//        if (Check())
+//        {
+//            if (searchobj.Users != null && searchobj.Users.Count > 0)
+//            {
+//                searchobj.Users = searchobj.Users.Where(Filtr).ToList();
+//            }
+//            else
+//            {
+//                searchobj.Users = repository.GetFilteredUsers(this);
+//            }
+//        }
+
+
+
+//    }
+//}
+
+//public class SearchDecoratorAppointmentHour : SearchDecorator
+//{
+//    [DataType(DataType.Time)]
+//    public DateTime? Hour { get; set; }
+//    SearchObject searchobj;
+
+
+
+//    public SearchDecoratorAppointmentHour()
+//    {
+
+//    }
+
+//    public SearchDecoratorAppointmentHour(IRepository repository, SearchObject obj, DateTime? Hour) : base(repository, obj)
+//    {
+//        this.Hour = Hour;
+//        FilteringType = Filtr;
+//        this.repository = repository;
+//        searchobj = obj;
+
+//    }
+
+
+//    public override bool Filtr(AppUser user)
+//    {
+//        if (true)
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            return false;
+//        }
+//    }
+
+
+//    public override void UsersFiltering()
+//    {
+//        if (Check())
+//        {
+//            if (searchobj.Users != null && searchobj.Users.Count > 0)
+//            {
+//                searchobj.Users = searchobj.Users.Where(Filtr).ToList();
+//            }
+//            else
+//            {
+//                searchobj.Users = repository.GetFilteredUsers(this);
+//            }
+//        }
+
+
+
+//    }
+
+
+//    public override bool Check()
+//    {
+//        if (Hour != null)
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            return false;
+//        }
+//    }
+
+
+
+//}
+
+

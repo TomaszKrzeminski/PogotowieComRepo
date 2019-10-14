@@ -1,0 +1,99 @@
+﻿@model AdvancedSearchViewModel
+@{
+    ViewData["Title"] = "AdvancedSearch";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>AdvancedSearch</h2>
+
+<div class="container">
+    <div class="row">
+        <form asp-controller="Home" asp-action="AdvancedSearch">
+
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="City" class="text-danger"></span></div>
+                    <lable>Miasto</lable>
+                    <input asp-for="City" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Specialization" class="text-danger"></span></div>
+                    <lable>Specjalista</lable>
+                    <input asp-for="Specialization" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Date" class="text-danger"></span></div>
+                    <lable>Data</lable>
+                    <input type="date" asp-for="Date" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Hour" class="text-danger"></span></div>
+                    <lable>Godzina</lable>
+                    <input type="time" asp-for="Hour" class="form-control">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-2">
+                    <button class="btn btn-warning" type="submit">Szukaj</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+@if (Model.UserList != null && Model.UserList.Count > 0)
+{
+    <div class="col-lg-12">
+        <table class="table-bordered">
+            <thead><tr><th>Nazwisko </th><th>Imię </th><th>Miasto</th><th>Rezerwuj wizytę </th></tr></thead>
+
+
+
+
+
+
+            @foreach (var user in Model.UserList)
+            {
+                <tr>
+                    <td>@user.Surname</td>
+                    <td>@user.UserName</td>
+                    <td>@user.City</td>
+                    <td>
+                        <form method="get" asp-action="ShowAppointmentsAdvanced" asp-controller="Appointment">
+                            <input type="hidden" name="DoctorId" value="@user.Id" /> 
+                            <button class="btn btn-primary" type="submit">Wizyty</button>
+                        </form>
+                    </td>
+
+                </tr>
+            }
+
+        </table>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+@section Scripts
+    {
+    <script type="text/javascript">
+        $(document).ready(function () { $("input.input-validation-error").closest(".form-group").addClass("has-danger"); });
+    </script>
+}

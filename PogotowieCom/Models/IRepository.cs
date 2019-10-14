@@ -36,7 +36,12 @@ namespace PogotowieCom.Models
         bool ChangeNotificationToChecked(int NotificationId, string UserId);
         bool RemoveAppointment(int AppointmentId);
         Appointment GetAppointmentByIdAllData(int AppointmentId);
-        List<AppUser> GetFilteredUsers(SearchObject obj);
+        List<AppUser> GetFilteredUsersCity(string City ,List<AppUser> list=null);
+        List<AppUser> GetFilteredUsersSpecialization( string Specialization ,List<AppUser> list = null);
+        List<AppUser> GetFilteredUsersDate( DateTime Date ,List<AppUser> list = null);
+        List<AppUser> GetFilteredUsersHour( DateTime Date ,List<AppUser> list = null);
+
+        
     }
 
 
@@ -543,14 +548,7 @@ namespace PogotowieCom.Models
                 context.SaveChanges();
 
 
-                //Appointment appointment = context.Appointments.Include(d => d.Doctor).Include(pa => pa.PatientAppointments).Where(a => a.AppointmentId == AppointmentId).First();
-
-                //PatientAppointment patientappointment = appointment.PatientAppointments.Where(pa => pa.AppointmentId == AppointmentId).First();
-
-                //appointment.PatientAppointments.Remove(patientappointment);
-
-                //context.SaveChanges();
-
+               
                 return true;
 
 
@@ -591,20 +589,161 @@ namespace PogotowieCom.Models
             }
         }
 
-        public List<AppUser> GetFilteredUsers(SearchObject obj)
+        
+
+        public List<AppUser>  GetExistingUsers(List<AppUser> listfromrepo,List<AppUser> listToCompare)
         {
+            List<AppUser> returnList = new List<AppUser>();
+
+            if(listToCompare.Count()==0||listfromrepo.Count()==0)
+            {
+                return returnList;
+            }
+
+            foreach (var compareU in listToCompare)
+            {
+                foreach (var repoU in listfromrepo)
+                {
+                    if(repoU.Id==compareU.Id)
+                    {
+                        returnList.Add(repoU);
+                    }
+                }
+            }
+
+            return returnList;
+
+        }
+
+
+        public List<AppUser> GetFilteredUsersCity( string City,List<AppUser> listCompare=null)
+        {
+            List<AppUser> list = new List<AppUser>();
+
             try
             {
+                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(b => b.Doctor).ThenInclude(b=>b.Appointments).ToList();
+                List<Place> places = context.Places.Where(c => c.City == City).Include(a => a.Appointments).ToList();
+                List<AppUser> UserList = new List<AppUser>();
+                foreach (var p in places)
+                {
 
-                List<AppUser> Users=context.Users.Include(d=>d.Doctor).Where(x=>x.City==obj.UsersFiltering)
 
+                    foreach (var l in list)
+                    {
+                      if(l.Doctor.Appointments.Where(x=>x.PlaceId==x.PlaceId).Any())
+                        {
+                            UserList.Add(l);
+                        }
+                    }
 
+                   
+                }
+
+                if(listCompare!=null)
+                {
+                    UserList = GetExistingUsers(listCompare, UserList);
+                }
+
+               
+                return UserList;
             }
             catch(Exception ex)
             {
-                return new List<AppUser>();
+                return list;
             }
+
+
+
         }
+
+
+        public List<AppUser> GetFilteredUsersSpecialization( string Specialization,List<AppUser> listCompare=null)
+        {
+            List<AppUser> list = new List<AppUser>();
+
+            try
+            {
+
+                int Id = context.Specializations.Where(x => x.Name == Specialization).Select(a => a.SpecializationId).First();
+
+
+
+
+                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(b => b.Doctor).ThenInclude(b => b.DoctorSpecializations).Where(x=>x.Doctor.DoctorSpecializations.Where(i=>i.SpecializationId==Id).Any()).ToList();
+
+
+                if (listCompare != null)
+                {
+                    list = GetExistingUsers(listCompare, list);
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                return list;
+            }
+
+
+
+        }
+
+        public List<AppUser> GetFilteredUsersDate( DateTime Date,List<AppUser> listCompare=null)
+        {
+            List<AppUser> list = new List<AppUser>();
+
+            try
+            {
+
+              
+                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(d => d.Doctor).ThenInclude(a => a.Appointments).Where(x => x.Doctor.Appointments.Where(c => c.AppointmentDate >= Date).Any()).ToList();
+
+
+                if (listCompare != null)
+                {
+                    list = GetExistingUsers(listCompare, list);
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                return list;
+            }
+
+
+
+        }
+
+        public List<AppUser> GetFilteredUsersHour( DateTime Date ,List<AppUser> listCompare=null)
+        {
+            List<AppUser> list = new List<AppUser>();
+
+            try
+            {
+
+                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(d => d.Doctor).ThenInclude(a => a.Appointments).Where(x => x.Doctor.Appointments.Where(c => c.AppointmentStart >= Date).Any()).ToList();
+
+                if (listCompare != null)
+                {
+                    list = GetExistingUsers(listCompare, list);
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                return list;
+            }
+
+
+
+        }
+
+
+
+
     }
 
 
