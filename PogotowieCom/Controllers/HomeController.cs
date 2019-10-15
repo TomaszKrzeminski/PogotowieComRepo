@@ -16,11 +16,24 @@ namespace PogotowieCom.Controllers
         IRepository repository;
         private UserManager<AppUser> userManager;
 
+
+
         public HomeController(IRepository repo, UserManager<AppUser> userManager)
         {
             this.userManager = userManager;
             repository = repo;
         }
+
+
+
+        public HomeController(IRepository repo, IUserManager userMgr)
+        {
+            
+            repository = repo;
+        }
+
+
+
         private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
 
         public ViewResult HomePage()
@@ -28,32 +41,32 @@ namespace PogotowieCom.Controllers
             HomePageViewModel model = new HomePageViewModel() { Country = "Polska", City = "Świecie", MedicalSpecialist = "Stomatolog" /*"Wyszukaj specialistę" */};
             return View(model);
         }
-        [HttpPost]
-        public ViewResult HomePage(HomePageViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                return View(model);
-            }
-            else
-            {
-                return View(model);
-            }
+        //[HttpPost]
+        //public ViewResult HomePage(HomePageViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        return View(model);
+        //    }
+        //    else
+        //    {
+        //        return View(model);
+        //    }
 
-        }
+        //}
 
-        
+
 
         public IActionResult AdvancedSearch()
         {
             AdvancedSearchViewModel model = new AdvancedSearchViewModel();
-           
+
 
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult AdvancedSearch(AdvancedSearchViewModel  model)
+        public IActionResult AdvancedSearch(AdvancedSearchViewModel model)
         {
 
             if (ModelState.IsValid)
@@ -80,7 +93,7 @@ namespace PogotowieCom.Controllers
             }
 
 
-            
+
         }
 
 
@@ -115,7 +128,7 @@ namespace PogotowieCom.Controllers
         {
 
 
-            if(model.Ailments!=null&&model.Ailments.Count()>0)
+            if (model.Ailments != null && model.Ailments.Count() > 0)
             {
                 Specialist ginekolg = new Ginekolog(repository);
                 Specialist stomatolog = new Stomatolog(repository);
@@ -133,10 +146,10 @@ namespace PogotowieCom.Controllers
                 SearchDoctorViewModel DoctorModel = new SearchDoctorViewModel();
                 HomePageViewModel Model = model;
 
-                for (int i=0;i<listofspecialist.Count();i++)
+                for (int i = 0; i < listofspecialist.Count(); i++)
                 {
                     Model.MedicalSpecialist = listofspecialist[i];
-                    DoctorModel.Users.AddRange( repository.SearchForDoctor(Model).Users);
+                    DoctorModel.Users.AddRange(repository.SearchForDoctor(Model).Users);
                 }
 
                 DoctorModel.Users.Distinct(new UserComparer());
@@ -169,7 +182,7 @@ namespace PogotowieCom.Controllers
         }
 
 
-       
+
 
         public List<string> MakeTags(string Ailment)
         {
@@ -189,7 +202,7 @@ namespace PogotowieCom.Controllers
         public PartialViewResult FindAilment(List<Tag> Ailments)
 
         {
-            
+
 
             Specialist ginekolg = new Ginekolog(repository);
             Specialist stomatolog = new Stomatolog(repository);
@@ -207,136 +220,136 @@ namespace PogotowieCom.Controllers
 
 
             SearchDoctorViewModel doctormodel = repository.SearchForDoctor(new HomePageViewModel());
-            return PartialView("FindSpecialist",doctormodel);
+            return PartialView("FindSpecialist", doctormodel);
 
         }
 
 
-        public ViewResult MedicalSpecialists()
-        {
-            return View();
-        }
+        //        public ViewResult MedicalSpecialists()
+        //     /*   {*/
+        //            return View();
+        //        }
 
-        public ViewResult ShowAilment()
-        {
+        //        public ViewResult ShowAilment()
+        //        {
 
-            List<string> AilmentList = new List<string>() {
-"bezpłodność ",
-"bezsenność ",
-"białkomocz ",
-"biegunka ",
-"ból brzucha ",
-"bóle mięśni ",
-"bóle stawów ",
-"ból gardła ",
-"ból głowy ",
-"ból twarzy ",
-"ból ucha ",
-"ból w klatce piersiowej ",
-"ból zęba ",
-"brak apetytu ",
-"brzydki zapach ",
-"chrapanie ",
-"chrypka ",
-"chudnięcie ",
-"częste oddawanie moczu ",
-"depresja ",
-"drgawki ",
-"drżenie rąk ",
-"duszność ",
-"dysfagia ",
-"gorączka ",
-"guz ",
-"hiperglikemia ",
-"infekcje ",
-"kaszel ",
-"katar sienny ",
-"kichanie ",
-"kołatanie serca ",
-"kolka ",
-"krew w kale ",
-"krew w moczu ",
-"krwawienia międzymiesiączkowe ",
-"krwawienie ",
-"krwawienie z nosa ",
-"krwioplucie ",
-"łamliwość włosów ",
-"lęk ",
-"łzawienie oczu ",
-"migrena ",
-"mroczki przed oczami ",
-"mrużenie oczu ",
-"nadciśnienie ",
-"nadmierny apetyt ",
-"napięcie mięśni ",
-"nerwowość ",
-"niedotlenienie ",
-"niedowład ",
-"niedożywienie ",
-"nieostre widzenie ",
-"niepłodność ",
-"niestrawność ",
-"niewydolność nerek ",
-"nieżyt nosa ",
-"nudności ",
-"obrzęk ",
-"obrzęk jądra ",
-"odwodnienie ",
-"omamy ",
-"omdlenia ",
-"opryszczka ",
-"osłabienie ",
-"osteoporoza ",
-"otępienie ",
-"owrzodzenie ",
-"pobudzenie ",
-"podwójne widzenie ",
-"pokrzywka ",
-"potliwość ",
-"powiększenie śledziony ",
-"powiększenie wątroby ",
-"rozdrażnienie ",
-"rozstępy ",
-"rumień ",
-"senność ",
-"sinica ",
-"skurcz mięśni ",
-"smutek ",
-"spadek libido ",
-"stan zapalny ",
-"sucha skóra ",
-"swędzenie ",
-"świąd ",
-"trudności w oddychaniu ",
-"uczulenie ",
-"upławy ",
-"urojenia ",
-"utrata przytomności ",
-"utrata wagi ",
-"wrzody ",
-"wydzielina z nosa ",
-"wymioty ",
-"wysypka ",
-"wzdęcia ",
-"zaburzenia miesiączkowania ",
-"zaburzenia mowy ",
-"zaburzenia słuchu ",
-"zaburzenia widzenia ",
-"zaburzenia wzwodu ",
-"zaczerwienienie ",
-"zakażenie",
-"zakrzepica ",
-"zaparcia ",
-"zatkany nos ",
-"zawał ",
-"zawał płuca ",
-"zawroty głowy ",
-"zgaga ",
-"złe samopoczucie ",
-"zmęczenie ",
-" żółtaczka" };
-            return View();
-        }
+        //            List<string> AilmentList = new List<string>() {
+        //"bezpłodność ",
+        //"bezsenność ",
+        //"białkomocz ",
+        //"biegunka ",
+        //"ból brzucha ",
+        //"bóle mięśni ",
+        //"bóle stawów ",
+        //"ból gardła ",
+        //"ból głowy ",
+        //"ból twarzy ",
+        //"ból ucha ",
+        //"ból w klatce piersiowej ",
+        //"ból zęba ",
+        //"brak apetytu ",
+        //"brzydki zapach ",
+        //"chrapanie ",
+        //"chrypka ",
+        //"chudnięcie ",
+        //"częste oddawanie moczu ",
+        //"depresja ",
+        //"drgawki ",
+        //"drżenie rąk ",
+        //"duszność ",
+        //"dysfagia ",
+        //"gorączka ",
+        //"guz ",
+        //"hiperglikemia ",
+        //"infekcje ",
+        //"kaszel ",
+        //"katar sienny ",
+        //"kichanie ",
+        //"kołatanie serca ",
+        //"kolka ",
+        //"krew w kale ",
+        //"krew w moczu ",
+        //"krwawienia międzymiesiączkowe ",
+        //"krwawienie ",
+        //"krwawienie z nosa ",
+        //"krwioplucie ",
+        //"łamliwość włosów ",
+        //"lęk ",
+        //"łzawienie oczu ",
+        //"migrena ",
+        //"mroczki przed oczami ",
+        //"mrużenie oczu ",
+        //"nadciśnienie ",
+        //"nadmierny apetyt ",
+        //"napięcie mięśni ",
+        //"nerwowość ",
+        //"niedotlenienie ",
+        //"niedowład ",
+        //"niedożywienie ",
+        //"nieostre widzenie ",
+        //"niepłodność ",
+        //"niestrawność ",
+        //"niewydolność nerek ",
+        //"nieżyt nosa ",
+        //"nudności ",
+        //"obrzęk ",
+        //"obrzęk jądra ",
+        //"odwodnienie ",
+        //"omamy ",
+        //"omdlenia ",
+        //"opryszczka ",
+        //"osłabienie ",
+        //"osteoporoza ",
+        //"otępienie ",
+        //"owrzodzenie ",
+        //"pobudzenie ",
+        //"podwójne widzenie ",
+        //"pokrzywka ",
+        //"potliwość ",
+        //"powiększenie śledziony ",
+        //"powiększenie wątroby ",
+        //"rozdrażnienie ",
+        //"rozstępy ",
+        //"rumień ",
+        //"senność ",
+        //"sinica ",
+        //"skurcz mięśni ",
+        //"smutek ",
+        //"spadek libido ",
+        //"stan zapalny ",
+        //"sucha skóra ",
+        //"swędzenie ",
+        //"świąd ",
+        //"trudności w oddychaniu ",
+        //"uczulenie ",
+        //"upławy ",
+        //"urojenia ",
+        //"utrata przytomności ",
+        //"utrata wagi ",
+        //"wrzody ",
+        //"wydzielina z nosa ",
+        //"wymioty ",
+        //"wysypka ",
+        //"wzdęcia ",
+        //"zaburzenia miesiączkowania ",
+        //"zaburzenia mowy ",
+        //"zaburzenia słuchu ",
+        //"zaburzenia widzenia ",
+        //"zaburzenia wzwodu ",
+        //"zaczerwienienie ",
+        //"zakażenie",
+        //"zakrzepica ",
+        //"zaparcia ",
+        //"zatkany nos ",
+        //"zawał ",
+        //"zawał płuca ",
+        //"zawroty głowy ",
+        //"zgaga ",
+        //"złe samopoczucie ",
+        //"zmęczenie ",
+        //" żółtaczka" };
+        //            return View();
+        //        }
 
 
 

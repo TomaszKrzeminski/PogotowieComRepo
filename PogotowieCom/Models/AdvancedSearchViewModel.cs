@@ -11,7 +11,9 @@ namespace PogotowieCom.Models
 
         public List<AppUser> UserList { get; set; }
 
+
         public string City { get; set; }
+
 
         public string Specialization { get; set; }
 

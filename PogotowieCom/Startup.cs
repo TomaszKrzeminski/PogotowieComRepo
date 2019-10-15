@@ -29,6 +29,7 @@ namespace PogotowieCom
 
         public void ConfigureServices(IServiceCollection services)
         {
+           
             services.AddTransient<IRepository, Repository>();
             services.AddScoped<AppIdentityDbContext>();
             services.AddDbContext<AppIdentityDbContext>(options =>

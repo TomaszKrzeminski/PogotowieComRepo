@@ -127,7 +127,7 @@ namespace PogotowieCom.Models
                 {
                     search.Users = repository.GetFilteredUsersCity(search.model.City);
                     search.Set = true;
-                    search.SetState(search.Specialization);
+                    //search.SetState(search.Specialization);
                 }
             }
 
@@ -253,7 +253,7 @@ search.SetState(search.Hour);
                 }
                 else if (search.Set == false)
                 {
-                    search.Users = repository.GetFilteredUsersHour((DateTime)search.model.Date);
+                    search.Users = repository.GetFilteredUsersHour((DateTime)search.model.Hour);
                     search.Set = true;
                 }
             }
