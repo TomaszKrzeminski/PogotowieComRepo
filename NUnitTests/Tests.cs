@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
@@ -6,6 +7,7 @@ using PogotowieCom.Controllers;
 using PogotowieCom.Models;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Tests
 {
@@ -14,6 +16,7 @@ namespace Tests
         private Mock<UserManager<AppUser>> GetMockUserManager()
         {
             var userStoreMock = new Mock<IUserStore<AppUser>>();
+
             return new Mock<UserManager<AppUser>>(
                 userStoreMock.Object, null, null, null, null, null, null, null, null);
         }
@@ -25,7 +28,7 @@ namespace Tests
 
             IRepository repo = Mock.Of<IRepository>();
             UserManager<AppUser> userManager = GetMockUserManager().Object;
-            
+
 
 
             HomeController controller = new HomeController(repo, userManager);
@@ -58,7 +61,7 @@ namespace Tests
         {
             IRepository repo = Mock.Of<IRepository>();
             UserManager<AppUser> userManager = GetMockUserManager().Object;
-           
+
             HomeController controller = new HomeController(repo, userManager);
 
             AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel();
@@ -66,7 +69,7 @@ namespace Tests
             AdvancedSearchViewModel model = (controller.AdvancedSearch(modelTry) as ViewResult).ViewData.Model as AdvancedSearchViewModel;
 
 
-            Assert.That(model.UserList.Count,Is.EqualTo(0));
+            Assert.That(model.UserList.Count, Is.EqualTo(0));
 
         }
 
@@ -81,7 +84,7 @@ namespace Tests
         [Test]
         public void AdvancedSearch_returns_4_AppUsers_HourList()
         {
-            Mock<IRepository> mock= new Mock<IRepository>();
+            Mock<IRepository> mock = new Mock<IRepository>();
 
             List<AppUser> listCity = new List<AppUser>() { new AppUser() { UserName = "City1" }, new AppUser() { UserName = "City2" }, new AppUser() { UserName = "City3" }, new AppUser() { UserName = "City4" } };
             List<AppUser> listSpecialization = new List<AppUser>() { new AppUser() { UserName = "Specialization1" }, new AppUser() { UserName = "Specialization2" }, new AppUser() { UserName = "Specialization3" }, new AppUser() { UserName = "Specialization4" } };
@@ -90,10 +93,10 @@ namespace Tests
 
 
 
-            mock.Setup(r=>r.GetFilteredUsersCity(It.IsAny<string>(),null)).Returns<string, List<AppUser>>((a,b)=>listCity);
-            mock.Setup(r => r.GetFilteredUsersSpecialization(It.IsAny<string>(),null)).Returns<string,List<AppUser>>((a,b) => listSpecialization);
-            mock.Setup(r => r.GetFilteredUsersDate(It.IsAny<DateTime>(), null)).Returns<DateTime, List<AppUser>>((a,b) => listDate);
-            mock.Setup(r => r.GetFilteredUsersHour(It.IsAny<DateTime>(), null)).Returns<DateTime, List<AppUser>>((a,b) => listHour);
+            mock.Setup(r => r.GetFilteredUsersCity(It.IsAny<string>(), null)).Returns<string, List<AppUser>>((a, b) => listCity);
+            mock.Setup(r => r.GetFilteredUsersSpecialization(It.IsAny<string>(), null)).Returns<string, List<AppUser>>((a, b) => listSpecialization);
+            mock.Setup(r => r.GetFilteredUsersDate(It.IsAny<DateTime>(), null)).Returns<DateTime, List<AppUser>>((a, b) => listDate);
+            mock.Setup(r => r.GetFilteredUsersHour(It.IsAny<DateTime>(), null)).Returns<DateTime, List<AppUser>>((a, b) => listHour);
 
 
 
@@ -101,7 +104,7 @@ namespace Tests
 
             HomeController controller = new HomeController(mock.Object, userManager);
 
-            AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel() { City = "Świecie", Specialization = null, Date = DateTime.Now.Date, Hour = DateTime.Now.Date }; 
+            AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel() { City = "Świecie", Specialization = null, Date = DateTime.Now.Date, Hour = DateTime.Now.Date };
 
 
             AdvancedSearchViewModel model = (controller.AdvancedSearch(modelTry) as ViewResult).ViewData.Model as AdvancedSearchViewModel;
@@ -137,7 +140,7 @@ namespace Tests
 
             HomeController controller = new HomeController(mock.Object, userManager);
 
-            AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel() { City = "Świecie", Specialization = "Stomatolog", Date = DateTime.Now.Date  };
+            AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel() { City = "Świecie", Specialization = "Stomatolog", Date = DateTime.Now.Date };
 
 
             AdvancedSearchViewModel model = (controller.AdvancedSearch(modelTry) as ViewResult).ViewData.Model as AdvancedSearchViewModel;
@@ -210,7 +213,7 @@ namespace Tests
 
             HomeController controller = new HomeController(mock.Object, userManager);
 
-            AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel() {  Hour = DateTime.Now.Date };
+            AdvancedSearchViewModel modelTry = new AdvancedSearchViewModel() { Hour = DateTime.Now.Date };
 
 
             AdvancedSearchViewModel model = (controller.AdvancedSearch(modelTry) as ViewResult).ViewData.Model as AdvancedSearchViewModel;
@@ -229,17 +232,71 @@ namespace Tests
 
             Mock<IRepository> mock = new Mock<IRepository>();
             mock.Setup(r => r.ChangeNotificationToChecked(It.IsAny<int>(), It.IsAny<string>())).Returns(() => true);
-            UserManager<AppUser> userManager = GetMockUserManager().Object;
-            HomeController controller = new HomeController(mock.Object, userManager);
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+            AppUser appUser = new AppUser();
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+  {
+    new Claim(ClaimTypes.Name, "example name"),
+    new Claim(ClaimTypes.NameIdentifier, "1"),
+    new Claim("custom-claim", "example claim value"),
+  }, "mock"));
 
-            RedirectToActionResult result =(RedirectToActionResult) controller.NotificationChecked(1);
-          
+
+            mockUserManager
+    .Setup(x => x.GetUserAsync(user))
+    .ReturnsAsync(appUser);
+
+
+            HomeController controller = new HomeController(mock.Object, mockUserManager.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+            RedirectToActionResult result = (RedirectToActionResult)controller.NotificationChecked(1);
+
 
 
 
             Assert.AreEqual("HomePage", result.ActionName);
-            Assert.AreEqual("Home", result.ControllerName);
+
         }
+
+
+        [Test]
+        public void Find_Specialist_returns_4_Users_When_Ailments_Texts_Are_Null()
+        {
+            List<AppUser> listUsers = new List<AppUser>() { new AppUser() { UserName = "User1" }, new AppUser() { UserName = "User2" }, new AppUser() { UserName = "User3" } };
+            SearchDoctorViewModel model = new SearchDoctorViewModel();
+            HomePageViewModel homepageviewmodel = new HomePageViewModel();
+            homepageviewmodel.Ailments = new List<Tag>() { new Tag() { Text = null }, new Tag() { Text = null }, new Tag() { Text = null }, new Tag() { Text = null } };
+            model.Users = listUsers;
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.SearchForDoctor(It.IsAny<HomePageViewModel>())).Returns(() => model);
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+            HomeController controller = new HomeController(mockRepo.Object, mockUserManager.Object);
+
+
+            SearchDoctorViewModel result = (SearchDoctorViewModel)(controller.FindSpecialist(homepageviewmodel) as PartialViewResult).Model;
+
+
+
+            Assert.AreEqual(3,result.Users.Count);
+            Assert.AreEqual(result.Users[1].ToString(), "User2");
+
+        }
+
+
+
+
+
+
+
+
+
+
+
 
 
     }

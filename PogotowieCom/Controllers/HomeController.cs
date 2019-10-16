@@ -26,15 +26,13 @@ namespace PogotowieCom.Controllers
 
 
 
-        public HomeController(IRepository repo, IUserManager userMgr)
-        {
-            
-            repository = repo;
-        }
 
 
 
-        private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
+        private Task<AppUser> GetCurrentUserAsync() =>
+            userManager.GetUserAsync(HttpContext.User);
+
+
 
         public ViewResult HomePage()
         {
@@ -127,8 +125,27 @@ namespace PogotowieCom.Controllers
         public PartialViewResult FindSpecialist(HomePageViewModel model)
         {
 
+            bool CheckAilmentsText(List<Tag> list)
+            {
+                if (list != null)
+                {
+                    foreach (var item in list)
+                    {
+                        if (item.Text != null)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                               
+                return false;
+            }
 
-            if (model.Ailments != null && model.Ailments.Count() > 0)
+
+
+
+
+            if (CheckAilmentsText(model.Ailments))
             {
                 Specialist ginekolg = new Ginekolog(repository);
                 Specialist stomatolog = new Stomatolog(repository);

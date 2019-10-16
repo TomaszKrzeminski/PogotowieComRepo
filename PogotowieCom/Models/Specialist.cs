@@ -51,16 +51,13 @@ namespace PogotowieCom.Models
 
             List<Tag> SpecialistListOfTags = repository.GetTagsSpecialist(this);
 
-            foreach (var item in taglist)
-            {
-
-                {
-                    if (String.IsNullOrEmpty(item.Text))
-                    {
-                      Tag tag=   taglist.Where(t => t.Text == item.Text).First();
-                        taglist.Remove(tag);
-                    }
-                }
+                          
+                    //if (String.IsNullOrEmpty(item.Text))
+                    //{
+                    //  Tag tag=   taglist.Where(t => t.Text == item.Text).First();
+                    //    taglist.Remove(tag);
+                    //}
+               
 
 
                 Check = CompareTags(taglist, SpecialistListOfTags);
@@ -172,5 +169,4 @@ namespace PogotowieCom.Models
 
 
     }
-}
 
