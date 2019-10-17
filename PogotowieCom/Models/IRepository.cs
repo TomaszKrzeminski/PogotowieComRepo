@@ -26,6 +26,7 @@ namespace PogotowieCom.Models
         bool ReserveAppointment(ReserveAppointmentViewModel model);
         SearchDoctorViewModel SearchForDoctor(HomePageViewModel model);
         Place GetPlaceById(int PlaceId);
+        IQueryable<Tag> Tags { get; }
         IQueryable<Appointment> Appointments { get; set; }
         IQueryable<Place> Places { get; set; }
         IQueryable<Specialization> Specializations { get; }
@@ -51,7 +52,7 @@ namespace PogotowieCom.Models
         public IQueryable<Appointment> Appointments { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public IQueryable<Place> Places { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public IQueryable<Specialization> Specializations { get => context.Specializations.AsQueryable(); }
-
+        public IQueryable<Tag> Tags { get => context.Tags.AsQueryable(); }
 
         private AppIdentityDbContext context;
         private UserManager<AppUser> userManager;

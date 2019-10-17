@@ -287,7 +287,95 @@ namespace Tests
 
         }
 
+        [Test]
+        public void Find_Specialist_returns_2_Users_When_Ailments_Texts_Arent_Null()
+        {  List<Tag> GetTags(Specialist specialist)
+            {
 
+                if(specialist is Ginekolog)
+                {
+                    return new List<Tag>() { new Tag() {Text= "złe samopoczucie " }, new Tag() { Text = "niepłodność" }, new Tag() { Text = "bezpłodność " } };
+                }
+                else if(specialist is Stomatolog)
+                {
+                    return new List<Tag>() { new Tag() { Text = "złe samopoczucie " }, new Tag() { Text = "ból zęba" } };
+                }
+                else if(specialist is Ortopeda)
+                {
+                    return new List<Tag>() { new Tag() { Text = "bóle mięśni " }, new Tag() { Text = "napięcie mięśni " }, new Tag() { Text = "złe samopoczucie " } };
+                }
+
+                return new List<Tag>();
+
+            }
+
+            List<AppUser> listUsersG = new List<AppUser>() { new AppUser() { UserName = "UserG" }, new AppUser() { UserName = "UserG" } };
+            SearchDoctorViewModel modelG = new SearchDoctorViewModel();
+            modelG.Users = listUsersG;
+
+            List<AppUser> listUsersS = new List<AppUser>() { new AppUser() { UserName = "UserS" }, new AppUser() { UserName = "UserS" } };
+            SearchDoctorViewModel modelS = new SearchDoctorViewModel();
+            modelS.Users = listUsersS;
+
+            List<AppUser> listUsersO = new List<AppUser>() { new AppUser() { UserName = "UserO" }, new AppUser() { UserName = "UserO" } };
+            SearchDoctorViewModel modelO = new SearchDoctorViewModel();
+            modelO.Users = listUsersO;
+            SearchDoctorViewModel  GetViewModel(HomePageViewModel viewmodel)
+            {
+                
+                if (viewmodel.MedicalSpecialist=="Ginekolog")
+                {
+                    return modelG;
+                }
+                else if (viewmodel.MedicalSpecialist == "Ortopeda")
+                {
+                    return modelO;
+                }
+                else if (viewmodel.MedicalSpecialist == "Stomatolog")
+                {
+                    return modelS;
+                }
+
+
+                return null;
+
+
+            }
+
+
+
+
+
+            List<AppUser> listUsers = new List<AppUser>() { new AppUser() { UserName = "User1" }, new AppUser() { UserName = "User2" } };
+            SearchDoctorViewModel model = new SearchDoctorViewModel();
+            model.Users = listUsers;
+            HomePageViewModel homepageviewmodel = new HomePageViewModel();
+            homepageviewmodel.Ailments = new List<Tag>() { new Tag() { Text = "ból zęba" }, new Tag() { Text = null }, new Tag() { Text = "bezpłodność" }, new Tag() { Text = "bóle mięśni " } };
+          
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            mockRepo.Setup(r => r.GetTagsSpecialist(It.IsAny<Specialist>())).Returns<Specialist>((s) =>GetTags(s));
+
+            
+
+
+
+            mockRepo.Setup(r => r.SearchForDoctor(It.IsAny<HomePageViewModel>())).Returns<HomePageViewModel>((m) => GetViewModel(m));
+          
+           
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+            HomeController controller = new HomeController(mockRepo.Object, mockUserManager.Object);
+
+
+            SearchDoctorViewModel result = (SearchDoctorViewModel)(controller.FindSpecialist(homepageviewmodel) as PartialViewResult).Model;
+
+
+
+            Assert.AreEqual(6, result.Users.Count);
+          
+
+        }
 
 
 

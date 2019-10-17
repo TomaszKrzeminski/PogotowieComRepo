@@ -18,6 +18,9 @@ namespace PogotowieCom.Models
         public List<string> BodyParts { get; set; }
         
         public List<string> MedicalSpecialists { get; set; }
+
+        public List<string> AllAilments { get; set; }
+
         public List<Tag> Ailments { get; set; }
     }
 

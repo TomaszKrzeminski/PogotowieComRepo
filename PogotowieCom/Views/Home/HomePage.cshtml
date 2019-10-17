@@ -29,7 +29,7 @@
             <div class="col-lg-4 form-group ">
                 <lable class="pre-scrollable ">Kraj</lable>
                 <input asp-for="Country" class="form-control">
-               
+
             </div>
         </div>
         <div class="row">
@@ -44,22 +44,49 @@
                 <input asp-for="MedicalSpecialist" class="form-control">
             </div>
         </div>
-        <div class="row">
+        @*<div class="row">
+                <h3>Powiedz co Ci dolega</h3>
+
+                @for (int i = 0; i < 5; i++)
+                {
+                    <div class="col-lg-12 form-group ">
+                        <label>Objaw @(i + 1)</label>
+
+                        <input name="Ailments[@i].Text" class="form-control">
+                    </div>
+                }
+
+
+
+            </div>*@
+
+        <div class=" form-group">
             <h3>Powiedz co Ci dolega</h3>
 
             @for (int i = 0; i < 5; i++)
             {
-                <div class="col-lg-12 form-group ">
-                    <label>Objaw @(i + 1)</label>
+                <label asp-name="Objaw @(i+1)" class="col-lg-12">
+                   
+                        <select class="form-control" name="Ailments[@i].Text">
+                            @foreach (var tag in Model.AllAilments)
+                            {
 
-                    <input name="Ailments[@i].Text" class="form-control">
-                </div>
+                                <option>@tag</option>
+                            }
+                        </select>
+                   
+
+                </label>
             }
 
 
 
+
         </div>
-       
+
+
+
+
         <div class="row">
             <div class="col-lg-2">
                 <button class="btn btn-warning" type="submit">Szukaj</button>
@@ -73,12 +100,12 @@
 
     </div>
 
-   
+
 
 </div>
-    
-        
-    
+
+
+
 
 
 
@@ -92,33 +119,33 @@
 
 
 @section Scripts
-{
-<script type="text/javascript">
-    $(document).ready(function () {
+    {
+    <script type="text/javascript">
+        $(document).ready(function () {
 
-        $("#SelectDoctor").submit(function (e) {
-            e.preventDefault();
+            $("#SelectDoctor").submit(function (e) {
+                e.preventDefault();
 
-            $.ajax({
-                data: $(this).serialize(),
-                type: $(this).attr('method'),
-                url: $(this).attr('action'),
-                success: function (result) {
-                    $('#FindSpecialist').html(result);
-                }
+                $.ajax({
+                    data: $(this).serialize(),
+                    type: $(this).attr('method'),
+                    url: $(this).attr('action'),
+                    success: function (result) {
+                        $('#FindSpecialist').html(result);
+                    }
 
+
+                });
 
             });
 
+            function SubmitFunction() {
+                alert("Div clicked");
+            }
+
+
         });
-
-        function SubmitFunction() {
-            alert("Div clicked");
-        }
-
-
-    });
-</script>
+    </script>
 
 }
 
