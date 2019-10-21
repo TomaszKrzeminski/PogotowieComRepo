@@ -16,12 +16,46 @@ namespace PogotowieCom.Controllers
         private IRepository repository;
         private UserManager<AppUser> userManager;
         private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
-        public AppointmentController(IRepository repo, UserManager<AppUser> usermgr)
+        private Func<Task<AppUser>> GetUser;
+        private ITimeAndDate time;
+
+
+
+        //public AppointmentController(IRepository repo, UserManager<AppUser> usermgr)
+        //{
+        //    repository = repo;
+        //    userManager = usermgr;
+        //    GetUser=() => userManager.GetUserAsync(HttpContext.User);
+        //    time = new TimeAndDate();
+        //}
+
+
+        //public  AppointmentController(IRepository repo, UserManager<AppUser> usermgr,Func<Task<AppUser>> GetUser)
+        //{
+        //    repository = repo;
+        //    userManager = usermgr;
+        //    this.GetUser = GetUser;
+        //    time = new TimeAndDate();
+        //}
+
+
+        public AppointmentController(IRepository repo, UserManager<AppUser> usermgr,ITimeAndDate time, Func<Task<AppUser>> GetUser = null  )
         {
+
+            if (GetUser == null)
+            {
+                this.GetUser = () => userManager.GetUserAsync(HttpContext.User);
+            }
+            else
+            {
+                this.GetUser = GetUser;
+            }
+
+
             repository = repo;
             userManager = usermgr;
+            this.time = time;
         }
-
 
         public IActionResult AppointmentDetails(int AppointmentId)
         {
@@ -29,7 +63,7 @@ namespace PogotowieCom.Controllers
             try
             {
                 Appointment appointment = repository.GetAppointmentById(AppointmentId);
-                AppUser user = GetCurrentUserAsync().Result;
+                AppUser user = GetUser().Result;
                 int PatientId = (int)user.PatientId;
                 model = new ReserveAppointmentViewModel(repository, appointment, user.Id, AppointmentId, PatientId);
 
@@ -81,13 +115,13 @@ namespace PogotowieCom.Controllers
             int DoctorId = repository.GetDoctorIdByUserId(model.DoctorId);
             List<Appointment> list = repository.GetUserAppointments(DoctorId);
 
-            return View("ShowAppointments",list);
+            return View("ShowAppointments", list);
         }
 
         [Authorize(Roles = "Doktor")]
         public IActionResult ManageAppointments()
         {
-            int DoctorId = (int)GetCurrentUserAsync().Result.DoctorId;
+            int DoctorId = (int)GetUser().Result.DoctorId;
             List<Appointment> list = repository.GetUserAppointments(DoctorId);
             return View(list);
         }
@@ -97,7 +131,7 @@ namespace PogotowieCom.Controllers
         public IActionResult RemoveAppointment(int AppointmentId)
         {
             Appointment appointment = repository.GetAppointmentByIdAllData(AppointmentId);
-            AppUser user = GetCurrentUserAsync().Result;
+            AppUser user = GetUser().Result;
             List<IObserver> observers = new List<IObserver>();
             List<int> observeresId = appointment.PatientAppointments.Where(a => a.AppointmentId == AppointmentId).Select(id => id.PatientId).ToList();
             bool check = repository.RemoveAppointment(AppointmentId);
@@ -182,7 +216,7 @@ namespace PogotowieCom.Controllers
         [Authorize(Roles = "Doktor")]
         public IActionResult AddAppointment(int id = 0)
         {
-            AppUser user = GetCurrentUserAsync().Result;
+            AppUser user = GetUser().Result;
             int DoctorId = (int)user.DoctorId;
 
             AddAppointmentViewModel model = new AddAppointmentViewModel() { PlaceId = id, place = repository.GetPlaceById(id), DoctorId = DoctorId };
@@ -192,8 +226,9 @@ namespace PogotowieCom.Controllers
         [HttpPost]
         public IActionResult AddAppointment(AddAppointmentViewModel model)
         {
+           
 
-            DateTime now = DateTime.Now;
+            DateTime now = time.GetTime();
             now = now.AddHours(1);
 
             if (model.Appointment.AppointmentDate.HasValue && model.Appointment.AppointmentStart.HasValue && model.Appointment.AppointmentEnd.HasValue)

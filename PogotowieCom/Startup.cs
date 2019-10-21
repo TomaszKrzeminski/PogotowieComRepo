@@ -31,6 +31,8 @@ namespace PogotowieCom
         {
            
             services.AddTransient<IRepository, Repository>();
+            services.AddTransient<ITimeAndDate, TimeAndDate>();
+
             services.AddScoped<AppIdentityDbContext>();
             services.AddDbContext<AppIdentityDbContext>(options =>
                  options.UseSqlServer(
