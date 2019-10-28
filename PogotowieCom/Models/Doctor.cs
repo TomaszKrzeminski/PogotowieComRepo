@@ -38,8 +38,33 @@ namespace PogotowieCom.Models
 
     }
 
+    public class Comment
+    {
+        public int CommentId { get; set; }
+        public string Text { get; set; }
+        public int PatientId { get; set; }
+        public string PatientEmail { get; set; }
+        public DateTime date { get; set; }
 
 
+        public int? DoctorId { get; set; }
+        public Doctor Doctor { get; set; }
+
+    }
+
+   public class Vote
+    {
+
+        public int VoteId { get; set; }
+        public int DoctorsId { get; set; }
+        public int PatientId { get; set; }
+        public DateTime date { get; set; }
+        public int AppointmentId { get; set; }
+
+        public int? DoctorId { get; set; }
+        public Doctor Doctor { get; set; }
+
+    }
 
 
     public class PatientAppointment
@@ -93,6 +118,8 @@ namespace PogotowieCom.Models
 
             this.Appointments = new HashSet<Appointment>();
             this.DoctorSpecializations = new HashSet<DoctorSpecialization>();
+            this.Comments = new HashSet<Comment>();
+            this.Votes = new HashSet<Vote>();
 
         }
 
@@ -104,7 +131,8 @@ namespace PogotowieCom.Models
         public ICollection<DoctorSpecialization> DoctorSpecializations { get; set; }
 
         public ICollection<Appointment> Appointments { get; set; }
-
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Vote> Votes { get; set; }
 
     }
 

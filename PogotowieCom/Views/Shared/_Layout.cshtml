@@ -45,6 +45,12 @@
                         <a class="nav-item nav-link" asp-action="ManageAppointments" asp-controller="Appointment">Wizyty </a>
                     }
 
+                    if (User.IsInRole("Administrator"))
+                    {
+                        <a class="nav-item nav-link" asp-action="AdminPanel" asp-controller="Admin">Panel Administracyjny </a>
+                       
+                    }
+
                     <br />
                     <div>
                         @await Component.InvokeAsync("ShowSpecialization")

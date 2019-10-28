@@ -1,14 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using PogotowieCom.Controllers;
 using PogotowieCom.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Tests
 {
@@ -924,10 +930,88 @@ namespace Tests
 
     public class RoleAdminTests
     {
+        [Test]
+        public void Edit_Returns_RoleEditModel()
+        {
+
+
+            async Task<bool> CheckRole(AppUser user, string role)
+            {
+                if (user.ChooseRole == "User")
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+
+            List<AppUser> list = new List<AppUser>() { new AppUser() {Id="1",UserName="User 1" ,ChooseRole="User"},
+                new AppUser() {Id="2",UserName="User 2",ChooseRole="User" },
+                new AppUser() {Id="3",UserName="User 3",ChooseRole="None" },
+                new AppUser() {Id="4",UserName="User 4",ChooseRole="None" },
+                new AppUser() {Id="5",UserName="User 5" ,ChooseRole="User"}
+
+
+            };
+
+            mockUserManager.Setup(m => m.Users).Returns(list.AsQueryable());
+
+            mockUserManager.Setup(m => m.IsInRoleAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => CheckRole(a, b));
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            async Task<IdentityRole> GetRole(string role)
+            {
+                return new IdentityRole() { Name = "User", Id = "Id" };
+            }
+
+            roleManager.Setup(r => r.FindByIdAsync(It.IsAny<string>())).Returns<string>((a) => GetRole(a));
+
+            RoleAdminController controller = new RoleAdminController(roleManager.Object, mockUserManager.Object);
+
+            RoleEditModel result = (RoleEditModel)(controller.Edit("Id").Result as ViewResult).Model;
 
 
 
+            Assert.That(result.Members.ToList().Count == 3);
+            Assert.That(result.NonMembers.ToList().Count == 2);
 
+        }
+
+
+        [Test]
+        public void When_Model_Isnt_Valid_Edit_Returns_Model_String()
+        {
+
+            RoleModificationModel model = new RoleModificationModel() { RoleId = "User Role" };
+
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            
+
+            RoleAdminController controller = new RoleAdminController(roleManager.Object,mockUserManager.Object);
+
+            controller.ModelState.AddModelError("RoleName", "RoleName is required");
+
+            var result = controller.Edit(model).Result as OkObjectResult;
+
+
+            Assert.That(result.Value.ToString() == "User Role");
+
+        }
 
 
 
@@ -939,7 +1023,615 @@ namespace Tests
     }
 
 
+    public class UserControllerTests
+    {
 
+
+         class IdentityResultMock : SignInResult
+        {
+            public IdentityResultMock(bool succeeded = false)
+            {
+                this.Succeeded = succeeded;
+            }
+        }
+
+
+
+
+
+        [Test]
+        public void ChooseRole_Returns_List()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+           var  _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                null, null, null, null, null, null, null, null);
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager= new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            List<IdentityRole> Roles = new List<IdentityRole>();
+            Roles.Add(new IdentityRole() { Id = "Doctor", Name = "Doctor" });
+            Roles.Add(new IdentityRole() { Id = "User", Name = "User" });
+            Roles.Add(new IdentityRole() { Id = "Patient", Name = "Patient" });
+            Roles.Add(new IdentityRole() { Id = "Administrator", Name = "Administrator" });
+
+
+            _mockRoleManager.Setup(r => r.Roles).Returns(() => Roles.AsQueryable());
+
+
+            UserController controller = new UserController(_mockUserManager.Object,_mockSignInManager.Object,_mockRoleManager.Object,mockRepo.Object);
+
+            var result = (string[])(controller.ChooseRole() as ViewResult).Model;
+
+
+            Assert.That(result.ToList<string>().Count==3);
+        }
+
+        [Test]
+        public void RemoveSpecialization_Redirects_To_ManageSpecializations()
+        {
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(m => m.DeleteDoctorSpecialization(It.IsAny<string>(), It.IsAny<int>())).Returns(true);
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            ManageSpecializationsViewModel model = new ManageSpecializationsViewModel() { SpecializationId = 1, UserId = "User" };
+
+            var result = (controller.RemoveSpecialization(model) as RedirectToActionResult).ActionName;
+
+            Assert.That(result == "ManageSpecializations");
+
+
+        }
+
+
+
+        [Test]
+        public void ManageSpecializations_Returns_Model()
+        {
+
+           async Task<AppUser> GetUser()
+            {
+               return new AppUser() { Id = "User666" };
+            }
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(m => m.GetDoctorSpecializations(It.IsAny<string>())).Returns(()=>new List<Specialization>() { new Specialization() {Name="Dentysta" } });
+            
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object,GetUser);
+
+           
+
+            var result = (ManageSpecializationsViewModel)(controller.ManageSpecializations() as ViewResult).Model;
+
+            Assert.That(result.SpecializationName  == "None");
+            Assert.That(result.UserId == "User666");
+            Assert.That(result.specializations[0].Name == "Dentysta");
+
+
+
+
+
+
+
+        }
+
+
+        [TestCase("Pacjent","PatientView")]
+        [TestCase("Doktor", "DoctorView")]
+        [TestCase("None", "Error")]
+        public void Create_Returns_View(string Role,string resultViewName)
+        {
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+    
+
+
+          
+
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            ViewResult result = controller.Create(Role) as ViewResult;
+
+
+
+
+            Assert.That(result.ViewName == resultViewName);
+        }
+
+
+        [Test]
+        public void CreatePatient_Redirects_To_Action_When_Succes()
+        {
+            //Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            //var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            //var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+            //     null, null, null, null, null, null, null, null);
+
+            //IdentityResult identity = Mock.Of<IdentityResult>(i => i.Succeeded == true);
+
+            //async   Task<IdentityResult> Create(AppUser user,string Password)
+            //{
+            //    return identity;
+            //}
+
+            //_mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(),It.IsAny<string>())).Returns<Task<IdentityResult>>((a,b) =>Create(a,b) );
+
+            //var contextAccessor = new Mock<IHttpContextAccessor>();
+            //var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            //var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+            //    contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            //var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            //var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+            //             roleStore.Object, null, null, null, null);
+
+
+
+
+
+
+            //UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+
+
+
+
+
+
+
+
+        }
+
+
+
+        [Test]
+        public void CreatePatient_Returns_PartialView_When_Create_Fails()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            IdentityResult identity = Mock.Of<IdentityResult>(i => i.Succeeded == false);
+
+            async Task<IdentityResult> Create(AppUser user,string Password)
+            {
+                return identity;
+            }
+
+            _mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser,string>( (a,b)=>Create(a,b) );
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            ViewResult result = controller.CreatePatient(new CreatePatientModel() { Password = "Password", Name = "User", Surname = "Surname User" }).Result as ViewResult;
+
+
+            Assert.That(result.ViewName == "PatientView");
+
+
+        }
+
+        [Test]
+        public void CreatePatient_Redirects_To_HomePage_Action()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.AddPatientToUser(It.IsAny<Patient>(), It.IsAny<string>())).Returns(true);
+            mockRepo.Setup(r => r.AddRoleToUser(It.IsAny<string>(), It.IsAny<string>())).Returns<string,string>((a,b)=>AddRole(a,b));
+
+            async Task<bool> AddRole(string user, string Password)
+            {
+                return true;
+            }
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            IdentityResult identity = Mock.Of<IdentityResult>(i => i.Succeeded == true);
+
+            async Task<IdentityResult> Create(AppUser user, string Password)
+            {
+                return identity;
+            }
+
+            _mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => Create(a, b));
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            RedirectToActionResult result = controller.CreatePatient(new CreatePatientModel() { Password = "Password", Name = "User", Surname = "Surname User",ChooseRole="Patient" }).Result as RedirectToActionResult;
+
+
+            Assert.That(result.ActionName=="HomePage");
+
+
+        }
+
+
+
+
+        [Test]
+        public void CreateDoctor_Returns_View_When_Create_Fails()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            IdentityResult identity = Mock.Of<IdentityResult>(i => i.Succeeded == false);
+
+            async Task<IdentityResult> Create(AppUser user, string Password)
+            {
+                return identity;
+            }
+
+            _mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => Create(a, b));
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            ViewResult result = controller.CreateDoctor(new CreateDoctorModel() { Password = "Password", Name = "User", Surname = "Surname User",PriceForVisit=100 }).Result as ViewResult;
+
+
+            Assert.That(result.ViewName == "DoctorView");
+
+
+        }
+
+        [Test]
+        public void CreateDoctor_Redirects_To_AddDoctorDetails_Action()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.AddDoctorToUser(It.IsAny<Doctor>(), It.IsAny<string>())).Returns(true);
+            mockRepo.Setup(r => r.AddRoleToUser(It.IsAny<string>(), It.IsAny<string>())).Returns<string, string>((a, b) => AddRole(a, b));
+
+            async Task<bool> AddRole(string user, string Password)
+            {
+                return true;
+            }
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            IdentityResult identity = Mock.Of<IdentityResult>(i => i.Succeeded == true);
+
+            async Task<IdentityResult> Create(AppUser user, string Password)
+            {
+                return identity;
+            }
+
+            _mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => Create(a, b));
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            RedirectToActionResult result = controller.CreateDoctor(new CreateDoctorModel() { Password = "Password", Name = "User", Surname = "Surname User", PriceForVisit = 100 }).Result as RedirectToActionResult;
+
+
+            Assert.That(result.ActionName == "AddDoctorDetails");
+
+
+        }
+
+        [Test]
+        public void AddDoctorDetails_Returns_DoctorDetailsViewModel()
+        {
+
+            List<Specialization> GetSpecializations()
+            {
+                return new List<Specialization>() { new Specialization() { Name = "Specialization1" }, new Specialization() { Name = "Specialization2" }, new Specialization() { Name = "Specialization3" } };
+            }
+
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.Specializations).Returns(() => GetSpecializations().AsQueryable());
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+
+           async Task<AppUser> GetUser()
+            {
+                return new AppUser() { DoctorId = 1 };
+            }
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object, GetUser);
+                
+
+            DoctorDetailsViewModel result = (DoctorDetailsViewModel)(controller.AddDoctorDetails(new AppUser()) as ViewResult).Model;
+
+          
+
+            Assert.That(result.SpecializationList.Count == 3);
+            Assert.That(result.DoctorId == 1);
+
+
+
+
+
+
+
+
+        }
+
+        [Test]
+        public  void AddDoctorDetails_Redirects_To_ManageSpecializations()
+        {
+            List<Specialization> GetSpecializations()
+            {
+                return new List<Specialization>() { new Specialization() { Name = "Specialization1" }, new Specialization() { Name = "Specialization2" }, new Specialization() { Name = "Specialization3" } };
+            }
+
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.AddSpecializationToDoctor(It.IsAny<int>(),It.IsAny<string>())).Returns(() => true);
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+
+           
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+
+            RedirectToActionResult result = controller.AddDoctorDetails(new DoctorDetailsViewModel() {DoctorId=1,Specialization=new Specialization() {Name="Spec Name" } }) as RedirectToActionResult;
+
+
+
+            Assert.That(result.ActionName== "ManageSpecializations");
+           
+
+        }
+
+        [Test]
+        public void Login_Returns_Model_Login_When_Model_Isnt_Valid()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+          
+
+           
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            LoginModel result = (LoginModel)(controller.Login(new LoginModel() {Email="Email" },"Return Url").Result as ViewResult).Model;
+
+
+            Assert.That(result.Email=="Email");
+
+
+
+
+        }
+
+
+
+        [Test]
+        public void Login_Redirects_When_Model_Is_Valid()
+        {
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
+
+            async Task<AppUser> FindByEmail(string email)
+            {
+                return new AppUser() { UserName = "User", Id = "UserId", };
+            }
+
+            async Task<AppUser> SignOut()
+            {
+                return new AppUser() { UserName = "User SignOut", Id = "UserId", };
+            }
+
+            _mockUserManager.Setup(m => m.FindByEmailAsync(It.IsAny<string>())).Returns<string>((e) => FindByEmail(e));
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+
+            var _mockSignInManager = new Mock<SignInManager<AppUser>>(_mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null);
+
+            _mockSignInManager.Setup(s => s.SignOutAsync()).Returns(() => SignOut());
+
+                       
+                               
+
+
+        async Task<Microsoft.AspNetCore.Identity.SignInResult> GetSignInResult(AppUser appuser, string password, bool one, bool two)
+            {
+                return new IdentityResultMock(true);
+            }
+
+            _mockSignInManager.Setup(s => s.PasswordSignInAsync(It.IsAny<AppUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>())).Returns<AppUser, string, bool, bool>((a, b, c, d) => GetSignInResult(a, b, c, d));
+
+            var roleStore = new Mock<IRoleStore<IdentityRole>>();
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
+                         roleStore.Object, null, null, null, null);
+
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
+
+            RedirectResult result = controller.Login(new LoginModel() { Email = "Email" ,Password="Password"}, "Return Url").Result as RedirectResult;
+
+
+
+
+            Assert.That(result.Url== "Return Url");
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+    }
 
 
 

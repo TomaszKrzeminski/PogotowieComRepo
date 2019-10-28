@@ -16,12 +16,23 @@ namespace PogotowieCom.Controllers
         private RoleManager<IdentityRole> roleManager;
         private IRepository repository;
         private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
-        public UserController(UserManager<AppUser> usrMgr, SignInManager<AppUser> signinMgr,RoleManager<IdentityRole> roleMgr,IRepository repo)
+        private Func<Task<AppUser>> GetUser;
+        public UserController(UserManager<AppUser> usrMgr, SignInManager<AppUser> signinMgr, RoleManager<IdentityRole> roleMgr, IRepository repo, Func<Task<AppUser>> GetUser = null)
         {
             userManager = usrMgr;
             signInManager = signinMgr;
             roleManager = roleMgr;
             repository = repo;
+
+            if (GetUser == null)
+            {
+                GetUser = GetCurrentUserAsync;
+            }
+            else
+            {
+                this.GetUser = GetUser;
+            }
+
         }
 
 
@@ -48,8 +59,8 @@ namespace PogotowieCom.Controllers
         [Authorize]
         public ViewResult ManageSpecializations()
         {
-            AppUser user = GetCurrentUserAsync().Result;
-            ManageSpecializationsViewModel model =new ManageSpecializationsViewModel() {specializations=repository.GetDoctorSpecializations(user.Id),UserId=user.Id,SpecializationName="None" };
+            AppUser user = GetUser().Result;
+            ManageSpecializationsViewModel model = new ManageSpecializationsViewModel() { specializations = repository.GetDoctorSpecializations(user.Id), UserId = user.Id, SpecializationName = "None" };
 
             return View(model);
         }
@@ -62,12 +73,12 @@ namespace PogotowieCom.Controllers
 
                 case "Pacjent":
                     {
-                        return View("PatientView",new CreatePatientModel() { ChooseRole = Role });
+                        return View("PatientView", new CreatePatientModel() { ChooseRole = Role });
                         break;
                     }
                 case "Doktor":
                     {
-                        return View("DoctorView",new CreateDoctorModel() { ChooseRole = Role });
+                        return View("DoctorView", new CreateDoctorModel() { ChooseRole = Role });
                         break;
                     }
                 default:
@@ -76,7 +87,7 @@ namespace PogotowieCom.Controllers
             }
 
 
-           
+
         }
 
 
@@ -84,16 +95,16 @@ namespace PogotowieCom.Controllers
         {
             List<string> list = new List<string>();
 
-           IList<IdentityRole> Roles=    roleManager.Roles.ToList();
+            IList<IdentityRole> Roles = roleManager.Roles.ToList();
 
 
-            if(Roles!=null&&Roles.Count>0)
+            if (Roles != null && Roles.Count > 0)
             {
-               
+
                 try
                 {
-                  IdentityRole roleAdmin = Roles.Where(r => r.Name == "Administrator").First();
-                  if(roleAdmin!=null)
+                    IdentityRole roleAdmin = Roles.Where(r => r.Name == "Administrator").First();
+                    if (roleAdmin != null)
                     {
                         Roles.Remove(roleAdmin);
                     }
@@ -102,7 +113,7 @@ namespace PogotowieCom.Controllers
                 {
 
                 }
-               
+
                 foreach (var role in Roles)
                 {
                     list.Add(role.Name);
@@ -113,8 +124,8 @@ namespace PogotowieCom.Controllers
         }
 
 
-               
-  
+
+
 
 
         [HttpPost]
@@ -139,14 +150,14 @@ namespace PogotowieCom.Controllers
 
                 IdentityResult result = await userManager.CreateAsync(user, model.Password);
 
-               
+
 
                 if (result.Succeeded)
                 {
-                    Patient patient = new Patient() {  };
+                    Patient patient = new Patient() { };
                     repository.AddPatientToUser(patient, user.Email);
-                   await repository.AddRoleToUser(user.Email, user.ChooseRole);
-                    return RedirectToAction("HomePage","Home",null);
+                    await repository.AddRoleToUser(user.Email, user.ChooseRole);
+                    return RedirectToAction("HomePage", "Home", null);
                 }
                 else
                 {
@@ -158,7 +169,7 @@ namespace PogotowieCom.Controllers
 
             }
 
-            return View("PatientView",model);
+            return View("PatientView", model);
         }
 
         [HttpPost]
@@ -182,8 +193,8 @@ namespace PogotowieCom.Controllers
 
 
                 IdentityResult result = await userManager.CreateAsync(user, model.Password);
-                
-                
+
+
                 if (result.Succeeded)
                 {
                     Doctor doctor = new Doctor() { PriceForVisit = model.PriceForVisit };
@@ -202,20 +213,20 @@ namespace PogotowieCom.Controllers
 
             }
 
-            return View("DoctorView",model);
+            return View("DoctorView", model);
         }
 
 
         public ViewResult AddDoctorDetails(AppUser user)
         {
 
-            if(user.DoctorId==null)
+            if (user.DoctorId == null)
             {
-                user = GetCurrentUserAsync().Result;
+                user = GetUser().Result;
             }
             List<Specialization> list = repository.Specializations.ToList();
-            DoctorDetailsViewModel model = new DoctorDetailsViewModel() { DoctorId =(int)user.DoctorId,SpecializationList=list };
-           
+            DoctorDetailsViewModel model = new DoctorDetailsViewModel() { DoctorId = (int)user.DoctorId, SpecializationList = list };
+
             return View(model);
         }
         [HttpPost]
@@ -278,7 +289,7 @@ namespace PogotowieCom.Controllers
                     }
                 }
 
-                ModelState.AddModelError(nameof(LoginModel.Email), "Nieprawidłowa nazwa użytkownika lub hasłó");
+                ModelState.AddModelError(nameof(LoginModel.Email), "Nieprawidłowa nazwa użytkownika lub hasło");
             }
 
             return View(details);

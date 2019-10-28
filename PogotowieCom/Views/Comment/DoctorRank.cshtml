@@ -1,0 +1,48 @@
+﻿@model List<DoctorRankViewModel>
+@{
+    ViewData["Title"] = "DoctorRank";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>DoctorRank</h2>
+
+<div class="container">
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Numer w Rankingu</th>
+                    <th>Imię</th>
+                    <th>Nazwisko</th>
+                    <th>Specjalizacja</th>
+                    <th>Przyjmuję w</th>
+                    <th>Komentarze</th>
+                    <th>Najbliższa wizyta</th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach (var doctorRank in Model)
+                {
+                    <tr>
+                        <td>@doctorRank.RankNumber</td>
+                        <td>@doctorRank.Name</td>
+                        <td>@doctorRank.Surname</td>
+                        <td>@doctorRank.specializations.First()</td>
+                        <td>@doctorRank.places.First()</td>
+                        <td>@doctorRank.comments.First()</td>
+                        <td>@doctorRank.appointments</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    }
+    else
+    {
+        <h2>Brak Danych do Wyświetlenia</h2>
+    }
+
+</div>

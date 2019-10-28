@@ -9,6 +9,7 @@ namespace PogotowieCom.Models
 {
     public interface IRepository
     {
+        List<DoctorRankViewModel> GetCommentDetails();
         List<Tag> GetTagsSpecialist(Specialist specialist);
         int GetDoctorIdByUserId(string UserId);
         bool AddPatientToUser(Patient patient, string Email);
@@ -41,6 +42,7 @@ namespace PogotowieCom.Models
         List<AppUser> GetFilteredUsersSpecialization( string Specialization ,List<AppUser> list = null);
         List<AppUser> GetFilteredUsersDate( DateTime Date ,List<AppUser> list = null);
         List<AppUser> GetFilteredUsersHour( DateTime Date ,List<AppUser> list = null);
+        List<AppUser> GetAllUsers();
 
         
     }
@@ -742,9 +744,36 @@ namespace PogotowieCom.Models
 
         }
 
+        public List<AppUser> GetAllUsers()
+        {
+            List<AppUser> users = new List<AppUser>();
+
+            try
+            {
+                users = context.Users.Where(r => r.ChooseRole != null && r.ChooseRole == "Pacjeln" || r.ChooseRole == "Doktor").ToList();
+                return users;
+            }
+            catch(Exception ex)
+            {
+                return users;
+            }
+        }
+
+        public List<DoctorRankViewModel> GetCommentDetails()
+        {
+            List<DoctorRankViewModel> model = new List<DoctorRankViewModel>();
+            try
+            {
 
 
 
+                return model;
+            }
+            catch(Exception ex)
+            {
+                return model;
+            }
+        }
     }
 
 

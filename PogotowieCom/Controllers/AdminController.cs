@@ -9,14 +9,16 @@ using PogotowieCom.Models;
 
 namespace PogotowieCom.Controllers
 {
-    [Authorize(Roles ="Administrator")]
+    [Authorize(Roles = "Administrator")]
     public class AdminController : Controller
     {
         private UserManager<AppUser> userManager;
+        private IRepository repository;
 
-        public AdminController(UserManager<AppUser> usrMgr)
+        public AdminController(UserManager<AppUser> usrMgr, IRepository repo)
         {
             userManager = usrMgr;
+            this.repository = repo;
         }
 
 
@@ -31,12 +33,12 @@ namespace PogotowieCom.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             AppUser user = await userManager.FindByIdAsync(id);
-            if(user!=null)
+            if (user != null)
             {
                 IdentityResult result = await userManager.DeleteAsync(user);
-                if(result.Succeeded)
+                if (result.Succeeded)
                 {
-                    return RedirectToAction("Index");
+                    return RedirectToAction("ShowUsers");
                 }
                 else
                 {
@@ -51,6 +53,8 @@ namespace PogotowieCom.Controllers
             return View("Index", userManager.Users);
 
 
+
+
         }
 
         private void AddErrorsFromResult(IdentityResult result)
@@ -60,5 +64,22 @@ namespace PogotowieCom.Controllers
                 ModelState.AddModelError("", error.Description);
             }
         }
+
+
+        public ViewResult AdminPanel()
+        {
+            return View();
+        }
+
+        public ViewResult ShowUsers()
+        {
+
+            ShowUsersViewModel model = new ShowUsersViewModel();
+            model.Users = repository.GetAllUsers();
+
+            return View(model);
+        }
+
+
     }
 }
