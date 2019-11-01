@@ -1,0 +1,84 @@
+﻿@model AddVoteCommentViewModel
+@{
+    ViewData["Title"] = "AddCommentAndVote";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="container">
+    <div class="row">
+        <h2 class="text-left">@Model.Message</h2>
+    </div>
+    <div class="row">
+        <form asp-action="AddCommentAndVote" asp-controller="Comment" method="post">
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Message" type="hidden">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Comment.AppointmentId" type="hidden">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Comment.PatientId" type="hidden">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Comment.PatientEmail" type="hidden">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Comment.CommentAvailable" type="hidden">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Comment.CommentDate" type="hidden">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <input asp-for="Comment.Done" type="hidden">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Comment.Text" class="text-danger"></span></div>
+                    <lable>Komentarz do wizyty</lable>
+                    <input type="text" asp-for="Comment.Text" class="form-control" />
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group ">
+                    <div><span asp-validation-for="Comment.Points" class="text-danger"></span></div>
+                    <lable>Oceń wizytę</lable>
+                    <select class="form-control" name="Comment.Points">
+
+                        @for (int i = 0; i < 10; i++)
+                        {
+                            <option>@(i+1)</option>
+                        }
+
+
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 form-group">
+                    <input type="submit" class="btn btn-warning" value="Dodaj" />
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+

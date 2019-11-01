@@ -4,13 +4,33 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Moje konto</h2>
 
-@if(Model.NotificationList.Count>0)
-{
-    foreach (var item in Model.NotificationList)
+<div class="container">
+
+    @if(Model.Comment)
     {
-        <p>@item.NotificationText</p>
+        <div class="row">
+            <a asp-controller="Comment" asp-action="AddCommentAndVote" class="btn btn-warning">Prosimy o głos i komentarz po wizycie</a>
+        </div>
     }
-}
 
+
+<h1>Moje Konto</h1>
+
+    <div class="row">
+        <h2>Powiadomienia</h2>
+    </div>
+    <div class="row">
+
+        @if (Model.NotificationList.Count > 0)
+        {
+            foreach (var item in Model.NotificationList)
+            {
+                <p class="col col-lg-12 text-xl-center">@item.NotificationText</p>
+            }
+        }
+
+    </div>
+
+
+</div>

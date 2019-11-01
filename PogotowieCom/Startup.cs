@@ -58,6 +58,8 @@ namespace PogotowieCom
 
             });
 
+           
+
            Seed.EnsurePopulated(context);
         }
     }

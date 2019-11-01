@@ -40,12 +40,14 @@ namespace PogotowieCom.Controllers
 
             List<string> ListTags = new List<string>();
             ListTags.Add("");
-            ListTags.AddRange(  repository.Tags.Select(t=>t.Text).ToList());
+            ListTags.AddRange(repository.Tags.Select(t => t.Text).ToList());
             model.AllAilments = ListTags;
+
+
 
             return View(model);
         }
-      
+
         public IActionResult AdvancedSearch()
         {
             AdvancedSearchViewModel model = new AdvancedSearchViewModel();
@@ -100,9 +102,18 @@ namespace PogotowieCom.Controllers
         [Authorize]
         public ViewResult UsersPanel()
         {
+
             UsersAccountViewModel model = new UsersAccountViewModel();
             AppUser user = GetCurrentUserAsync().Result;
             model.NotificationList = repository.GetNotifications((int)user.PatientId, true);
+
+
+            var data = repository.CommentAndVoteCheck(user);
+            if (data != null)
+            {
+                model.Comment = true;
+            }
+
 
             return View(model);
         }
@@ -128,7 +139,7 @@ namespace PogotowieCom.Controllers
                         }
                     }
                 }
-                               
+
                 return false;
             }
 
@@ -179,7 +190,7 @@ namespace PogotowieCom.Controllers
 
 
 
-     
+
 
 
 
@@ -225,7 +236,7 @@ namespace PogotowieCom.Controllers
         }
 
 
-    
+
 
 
     }

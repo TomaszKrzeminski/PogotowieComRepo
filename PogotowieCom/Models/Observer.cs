@@ -46,15 +46,7 @@ namespace PogotowieCom.Models
             repository.AddNotificationToPatient(Patient.PatientId, notification);
         }
 
-       //public List<Notification>  GetAllNotifications()
-       // {
-       //     return repository.GetNotifications(Patient.PatientId, false);
-       // }
-
-       //public   List<Notification> GetNotCheckedNotifications()
-       // {
-       //     return repository.GetNotifications(Patient.PatientId, true);
-       // }
+    
 
     }
 
@@ -127,6 +119,24 @@ namespace PogotowieCom.Models
             notification = new Notification() { Checked = false, NotificationText = "Usunięto wizytę z  " + appointment.AppointmentDate+"u doktora "+user.UserName+" "+user.Surname+"  Przepraszamy" };
         }
     }
+
+
+    public class SubjectMakeComment : Subject
+    {
+        private AppUser user { get; set; }
+
+        public SubjectMakeComment(Appointment appointment, AppUser user) : base(appointment)
+        {
+            this.user = user;
+        }
+
+        public void MakeNotificationMakeCommentAndVote(Appointment appointment)
+        {
+
+            notification = new Notification() { Checked = false, NotificationText = "Prosimy o komentarz i ocenę wizyty  z  " + ((DateTime)appointment.AppointmentDate).ToShortDateString() + "u doktora " + user.UserName + " " + user.Surname  };
+        }
+    }
+
 
 
 

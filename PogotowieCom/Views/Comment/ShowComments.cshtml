@@ -1,0 +1,36 @@
+﻿@model ShowCommentsViewModel
+@{
+    ViewData["Title"] = "ShowComments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@if(Model.Comments!=null&&Model.Comments.Count()>0)
+{
+<div class="container">
+    <h2 class="bg-light text-center">Komentarze doktora @Model.user.UserName     @Model.user.Surname</h2>
+ 
+    @foreach (var comment in Model.Comments)
+    {
+        <div class="row">
+          <div class="col-lg-4">
+              <img src="~/Picutres/User.jpg" width="100" height="100" />
+          </div>
+            <div class="col-lg-8 bg-light">
+                <h5 class="text-info">@comment.PatientEmail      @comment.CommentDate</h5>
+                <p>@comment.Text</p>
+            </div>
+        </div>
+
+    }
+
+</div>
+}
+else
+{
+    <h2>Brak Komentarzy</h2>
+}
+
+
+

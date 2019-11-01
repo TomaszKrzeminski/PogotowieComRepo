@@ -9,6 +9,11 @@ namespace PogotowieCom.Models
 {
     public interface IRepository
     {
+        ShowCommentsViewModel GetCommentsAndDoctorData(string UserId);
+        AppUser GetUserByDoctorId(int Id);
+        bool AddCommentToComplete(int PatientId, Appointment appointment);
+        bool ChangeComment(Comment comment);
+        CommentData CommentAndVoteCheck(AppUser user);
         List<DoctorRankViewModel> GetCommentDetails();
         List<Tag> GetTagsSpecialist(Specialist specialist);
         int GetDoctorIdByUserId(string UserId);
@@ -38,13 +43,13 @@ namespace PogotowieCom.Models
         bool ChangeNotificationToChecked(int NotificationId, string UserId);
         bool RemoveAppointment(int AppointmentId);
         Appointment GetAppointmentByIdAllData(int AppointmentId);
-        List<AppUser> GetFilteredUsersCity(string City ,List<AppUser> list=null);
-        List<AppUser> GetFilteredUsersSpecialization( string Specialization ,List<AppUser> list = null);
-        List<AppUser> GetFilteredUsersDate( DateTime Date ,List<AppUser> list = null);
-        List<AppUser> GetFilteredUsersHour( DateTime Date ,List<AppUser> list = null);
+        List<AppUser> GetFilteredUsersCity(string City, List<AppUser> list = null);
+        List<AppUser> GetFilteredUsersSpecialization(string Specialization, List<AppUser> list = null);
+        List<AppUser> GetFilteredUsersDate(DateTime Date, List<AppUser> list = null);
+        List<AppUser> GetFilteredUsersHour(DateTime Date, List<AppUser> list = null);
         List<AppUser> GetAllUsers();
 
-        
+
     }
 
 
@@ -277,7 +282,7 @@ namespace PogotowieCom.Models
             try
             {
                 //List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).ToList();
-                List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).Where(x=>x.City==model.City).ToList();
+                List<AppUser> list = context.Users.Include(d => d.Doctor).ThenInclude(s => s.DoctorSpecializations).Where(u => u.Doctor.DoctorSpecializations.Where(s => s.Specialization.Name == model.MedicalSpecialist).Any()).Where(x => x.City == model.City).ToList();
                 if (list != null)
                 {
                     modelSearch.Users = list;
@@ -393,6 +398,9 @@ namespace PogotowieCom.Models
 
 
         }
+
+
+
 
         public List<Appointment> GetUserAppointments(int DoctorId)
         {
@@ -551,7 +559,7 @@ namespace PogotowieCom.Models
                 context.SaveChanges();
 
 
-               
+
                 return true;
 
 
@@ -581,9 +589,9 @@ namespace PogotowieCom.Models
             string name = specialist.GetNameOfSpecialization();
             try
             {
-                Specialization specialization = context.Specializations.Include(s => s.TagSpecializations).ThenInclude(s=>s.Tag).Where(x=>x.Name==name).First();
+                Specialization specialization = context.Specializations.Include(s => s.TagSpecializations).ThenInclude(s => s.Tag).Where(x => x.Name == name).First();
                 TagList = specialization.TagSpecializations.Select(z => z.Tag).ToList();
-                
+
                 return TagList;
             }
             catch (Exception ex)
@@ -592,13 +600,13 @@ namespace PogotowieCom.Models
             }
         }
 
-        
 
-        public List<AppUser>  GetExistingUsers(List<AppUser> listfromrepo,List<AppUser> listToCompare)
+
+        public List<AppUser> GetExistingUsers(List<AppUser> listfromrepo, List<AppUser> listToCompare)
         {
             List<AppUser> returnList = new List<AppUser>();
 
-            if(listToCompare.Count()==0||listfromrepo.Count()==0)
+            if (listToCompare.Count() == 0 || listfromrepo.Count() == 0)
             {
                 return returnList;
             }
@@ -607,7 +615,7 @@ namespace PogotowieCom.Models
             {
                 foreach (var repoU in listfromrepo)
                 {
-                    if(repoU.Id==compareU.Id)
+                    if (repoU.Id == compareU.Id)
                     {
                         returnList.Add(repoU);
                     }
@@ -619,13 +627,13 @@ namespace PogotowieCom.Models
         }
 
 
-        public List<AppUser> GetFilteredUsersCity( string City,List<AppUser> listCompare=null)
+        public List<AppUser> GetFilteredUsersCity(string City, List<AppUser> listCompare = null)
         {
             List<AppUser> list = new List<AppUser>();
 
             try
             {
-                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(b => b.Doctor).ThenInclude(b=>b.Appointments).ToList();
+                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(b => b.Doctor).ThenInclude(b => b.Appointments).ToList();
                 List<Place> places = context.Places.Where(c => c.City == City).Include(a => a.Appointments).ToList();
                 List<AppUser> UserList = new List<AppUser>();
                 foreach (var p in places)
@@ -634,24 +642,24 @@ namespace PogotowieCom.Models
 
                     foreach (var l in list)
                     {
-                      if(l.Doctor.Appointments.Where(x=>x.PlaceId==x.PlaceId).Any())
+                        if (l.Doctor.Appointments.Where(x => x.PlaceId == x.PlaceId).Any())
                         {
                             UserList.Add(l);
                         }
                     }
 
-                   
+
                 }
 
-                if(listCompare!=null)
+                if (listCompare != null)
                 {
                     UserList = GetExistingUsers(listCompare, UserList);
                 }
 
-               
+
                 return UserList;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return list;
             }
@@ -661,7 +669,7 @@ namespace PogotowieCom.Models
         }
 
 
-        public List<AppUser> GetFilteredUsersSpecialization( string Specialization,List<AppUser> listCompare=null)
+        public List<AppUser> GetFilteredUsersSpecialization(string Specialization, List<AppUser> listCompare = null)
         {
             List<AppUser> list = new List<AppUser>();
 
@@ -673,7 +681,7 @@ namespace PogotowieCom.Models
 
 
 
-                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(b => b.Doctor).ThenInclude(b => b.DoctorSpecializations).Where(x=>x.Doctor.DoctorSpecializations.Where(i=>i.SpecializationId==Id).Any()).ToList();
+                list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(b => b.Doctor).ThenInclude(b => b.DoctorSpecializations).Where(x => x.Doctor.DoctorSpecializations.Where(i => i.SpecializationId == Id).Any()).ToList();
 
 
                 if (listCompare != null)
@@ -692,14 +700,14 @@ namespace PogotowieCom.Models
 
         }
 
-        public List<AppUser> GetFilteredUsersDate( DateTime Date,List<AppUser> listCompare=null)
+        public List<AppUser> GetFilteredUsersDate(DateTime Date, List<AppUser> listCompare = null)
         {
             List<AppUser> list = new List<AppUser>();
 
             try
             {
 
-              
+
                 list = context.Users.Where(c => c.ChooseRole != null && c.ChooseRole == "Doktor").Include(d => d.Doctor).ThenInclude(a => a.Appointments).Where(x => x.Doctor.Appointments.Where(c => c.AppointmentDate >= Date).Any()).ToList();
 
 
@@ -719,7 +727,7 @@ namespace PogotowieCom.Models
 
         }
 
-        public List<AppUser> GetFilteredUsersHour( DateTime Date ,List<AppUser> listCompare=null)
+        public List<AppUser> GetFilteredUsersHour(DateTime Date, List<AppUser> listCompare = null)
         {
             List<AppUser> list = new List<AppUser>();
 
@@ -753,7 +761,7 @@ namespace PogotowieCom.Models
                 users = context.Users.Where(r => r.ChooseRole != null && r.ChooseRole == "Pacjeln" || r.ChooseRole == "Doktor").ToList();
                 return users;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return users;
             }
@@ -764,15 +772,145 @@ namespace PogotowieCom.Models
             List<DoctorRankViewModel> model = new List<DoctorRankViewModel>();
             try
             {
+                List<DoctorRankViewModel> listRank = new List<DoctorRankViewModel>();
+                List<AppUser> Doctors = context.Users.Include(x=>x.Doctor).Where(d => d.Doctor != null).ToList();
 
 
+                foreach (var doctor in Doctors)
+                {
+                    List<Comment> comments = context.Comments.Where(d => d.DoctorId == doctor.DoctorId).ToList();
+                    List<Place> places = context.Appointments.Where(d => d.DoctorId == doctor.DoctorId).Select(p => p.Place).ToList();
+                    List<Appointment> appointments = context.Appointments.Where(d =>d.DoctorId==doctor.DoctorId&& d.AppointmentEnd > DateTime.Now).ToList();
+
+                    List<Specialization> specializations = context.Specializations.Include(d=>d.DoctorSpecializations).Where(s => s.DoctorSpecializations.Any(d => d.DoctorId == doctor.DoctorId)).ToList();
+
+                    DoctorRankViewModel rankmodel = new DoctorRankViewModel(doctor.Doctor,doctor,comments,places,appointments,specializations) ;
+
+                    listRank.Add(rankmodel);
+
+                }
+
+
+          IEnumerable<DoctorRankViewModel> query=listRank.OrderByDescending(x => x.Points);
+               
+
+                return query.ToList();
+            }
+            catch (Exception ex)
+            {
+                return model;
+            }
+        }
+
+        public CommentData CommentAndVoteCheck(AppUser user)
+        {
+            CommentData data = new CommentData();
+            try
+            {
+                DateTime now = DateTime.Now;
+                Comment comment = context.Comments.Where(x => x.PatientId == user.PatientId && x.Done == false && x.CommentAvailable < now).First();
+                if (comment != null)
+                {
+                    AppUser userDoctor = context.Users.Where(d => d.DoctorId != null && d.DoctorId == comment.DoctorId).First();
+                    Appointment appointment = context.Appointments.Where(a => a.AppointmentId == comment.AppointmentId).First();
+
+                    data.appointment = appointment;
+                    data.user = userDoctor;
+
+                    return data;
+
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public bool AddCommentToComplete(int PatientId, Appointment appointment)
+        {
+            Comment comment = new Comment();
+            try
+            {
+                string Email = context.Users.Where(x => x.Patient != null && x.PatientId == PatientId).First().Email;
+
+                comment.AppointmentId = appointment.AppointmentId;
+                comment.CommentAvailable = (DateTime)appointment.AppointmentEnd;
+                comment.Done = false;
+                comment.PatientId = PatientId;
+                comment.Points = 0;
+                comment.PatientEmail = Email;
+
+                Doctor doctor = context.Doctors.Find(appointment.DoctorId);
+                doctor.Comments.Add(comment);
+                context.SaveChanges();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+
+        public bool ChangeComment(Comment comment)
+        {
+
+            try
+            {
+                Comment commentToChange = context.Comments.Where(c => c.AppointmentId == comment.AppointmentId).First();
+                commentToChange.CommentDate = comment.CommentDate;
+                commentToChange.Done = true;
+                commentToChange.Points = comment.Points;
+                commentToChange.Text = comment.Text;
+
+                context.SaveChanges();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public AppUser GetUserByDoctorId(int Id)
+        {
+            try
+            {
+                AppUser user = context.Users.Where(u => u.DoctorId != null && u.DoctorId == Id).First();
+                return user;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public ShowCommentsViewModel GetCommentsAndDoctorData(string UserId)
+        {
+            ShowCommentsViewModel model = new ShowCommentsViewModel();
+
+            try
+            {
+                AppUser user = context.Users.Include(d => d.Doctor).Where(u => u.Id == UserId).First();
+                List<Comment> list = context.Comments.Where(c => c.DoctorId == user.DoctorId).ToList();
+
+                model.user = user;
+                model.Comments = list;
 
                 return model;
+
+
             }
             catch(Exception ex)
             {
                 return model;
             }
+
         }
     }
 

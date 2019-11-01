@@ -21,25 +21,10 @@ namespace PogotowieCom.Controllers
 
 
 
-        //public AppointmentController(IRepository repo, UserManager<AppUser> usermgr)
-        //{
-        //    repository = repo;
-        //    userManager = usermgr;
-        //    GetUser=() => userManager.GetUserAsync(HttpContext.User);
-        //    time = new TimeAndDate();
-        //}
 
 
-        //public  AppointmentController(IRepository repo, UserManager<AppUser> usermgr,Func<Task<AppUser>> GetUser)
-        //{
-        //    repository = repo;
-        //    userManager = usermgr;
-        //    this.GetUser = GetUser;
-        //    time = new TimeAndDate();
-        //}
 
-
-        public AppointmentController(IRepository repo, UserManager<AppUser> usermgr,ITimeAndDate time, Func<Task<AppUser>> GetUser = null  )
+        public AppointmentController(IRepository repo, UserManager<AppUser> usermgr, ITimeAndDate time, Func<Task<AppUser>> GetUser = null)
         {
 
             if (GetUser == null)
@@ -84,6 +69,9 @@ namespace PogotowieCom.Controllers
 
             if (check)
             {
+                Appointment appointment = repository.GetAppointmentByIdAllData(model.AppointmentId);
+
+                repository.AddCommentToComplete(model.PatientId, appointment);
                 Subject subject = new Subject();
                 Observer obserwer = new Observer(subject, repository, model.PatientId);
                 subject.MakeNotificationReservedAppointment(model.timeSelected);
@@ -104,7 +92,17 @@ namespace PogotowieCom.Controllers
         {
 
             int DoctorId = repository.GetDoctorIdByUserId(model.DoctorId);
-            List<Appointment> list = repository.GetUserAppointments(DoctorId).Where(a => a.Place.Country == model.Country && a.Place.City == model.City).ToList();
+            List<Appointment> list = new List<Appointment>();
+
+            if (String.IsNullOrEmpty(model.Country) && String.IsNullOrEmpty(model.City))
+            {
+                 list = repository.GetUserAppointments(DoctorId).OrderByDescending(d=>d.AppointmentDate).ToList();
+            }
+            else
+            {
+                 list = repository.GetUserAppointments(DoctorId).Where(a => a.Place.Country == model.Country && a.Place.City == model.City).ToList();
+            }
+
 
             return View(list);
         }
@@ -226,7 +224,7 @@ namespace PogotowieCom.Controllers
         [HttpPost]
         public IActionResult AddAppointment(AddAppointmentViewModel model)
         {
-           
+
 
             DateTime now = time.GetTime();
             now = now.AddHours(1);

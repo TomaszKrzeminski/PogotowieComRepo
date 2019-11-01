@@ -8,7 +8,7 @@ namespace PogotowieCom.Models
     public class UsersAccountViewModel
     {
        public List<Notification> NotificationList { get; set; }
-
+       public bool Comment { get; set; }
 
 
     }

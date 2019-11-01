@@ -285,6 +285,22 @@ namespace PogotowieCom.Controllers
                     Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(user, details.Password, false, false);
                     if (result.Succeeded)
                     {
+
+                        if(user.ChooseRole=="Pacjent")
+                        {
+                        CommentData data=  repository.CommentAndVoteCheck(user);
+
+                            if(data!=null)
+                            {
+                            SubjectMakeComment subject = new SubjectMakeComment(data.appointment,data.user);
+                            Observer obserwer = new Observer(subject, repository, (int)user.PatientId);
+                            subject.MakeNotificationMakeCommentAndVote(data.appointment);
+                            subject.notifyObservers();
+                            }
+
+                          
+                        }
+                       
                         return Redirect(returnUrl ?? "/");
                     }
                 }

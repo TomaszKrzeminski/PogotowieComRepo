@@ -39,6 +39,7 @@ namespace PogotowieCom.Models
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TagSpecialization> TagSpecializations { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
 
 
