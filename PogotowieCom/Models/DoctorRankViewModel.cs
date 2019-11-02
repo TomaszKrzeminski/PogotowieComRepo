@@ -9,7 +9,10 @@ namespace PogotowieCom.Models
     {
 
 
+         public DoctorRankViewModel()
+        {
 
+        }
 
 
         public DoctorRankViewModel(Doctor doctor, AppUser user, List<Comment> comments, List<Place> places, List<Appointment> appointments, List<Specialization> specializations)

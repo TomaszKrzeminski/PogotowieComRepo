@@ -12,17 +12,33 @@ namespace PogotowieCom.Controllers
     {
         private IRepository repository;
         private UserManager<AppUser> userManager;
-        public CommentController(IRepository repository,  UserManager<AppUser> userManager)
+        private ITimeAndDate time;
+        private Func<Task<AppUser>> GetUser;
+        public CommentController(IRepository repository,  UserManager<AppUser> userManager,ITimeAndDate time, Func<Task<AppUser>> GetUser = null)
         {
+
+            if (GetUser == null)
+            {
+                this.GetUser = () => userManager.GetUserAsync(HttpContext.User);
+            }
+            else
+            {
+                this.GetUser = GetUser;
+            }
+
+
             this.userManager=userManager;
             this.repository = repository;
+            this.time = time;
+          
+
         }
 
 
         public ViewResult AddCommentAndVote()
         {
 
-             AppUser user=  userManager.GetUserAsync(HttpContext.User).Result;
+             AppUser user=  GetUser().Result;
            
             CommentData data = repository.CommentAndVoteCheck(user);
 
@@ -77,9 +93,9 @@ namespace PogotowieCom.Controllers
 
         public IActionResult ShowComments(string UserId)
         {
-           ShowCommentsViewModel commentList=repository.GetCommentsAndDoctorData(UserId);
+           ShowCommentsViewModel model=repository.GetCommentsAndDoctorData(UserId);
 
-            return View(commentList);
+            return View(model);
         }
 
         public IActionResult DoctorRank()

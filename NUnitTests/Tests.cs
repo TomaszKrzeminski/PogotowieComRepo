@@ -408,7 +408,7 @@ namespace Tests
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
-            AdminController controller = new AdminController(mockUserManager.Object);
+            AdminController controller = new AdminController(mockUserManager.Object,mockRepo.Object);
 
             List<AppUser> result = (List<AppUser>)(controller.Delete("Empty").Result as ViewResult).Model;
             ViewResult viewResult = controller.Delete("Empty").Result as ViewResult;
@@ -445,7 +445,7 @@ namespace Tests
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
-            AdminController controller = new AdminController(mockUserManager.Object);
+            AdminController controller = new AdminController(mockUserManager.Object,mockRepo.Object);
 
             RedirectToActionResult Result = controller.Delete("Empty").Result as RedirectToActionResult;
 
@@ -927,91 +927,91 @@ namespace Tests
 
 
 
-
+    
     public class RoleAdminTests
     {
-        [Test]
-        public void Edit_Returns_RoleEditModel()
-        {
+        //[Test]
+        //public void Edit_Returns_RoleEditModel()
+        //{
 
 
-            async Task<bool> CheckRole(AppUser user, string role)
-            {
-                if (user.ChooseRole == "User")
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+        //    async Task<bool> CheckRole(AppUser user, string role)
+        //    {
+        //        if (user.ChooseRole == "User")
+        //        {
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return false;
+        //        }
+        //    }
 
-            var mockUserStore = new Mock<IUserStore<AppUser>>();
-            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
-
-
-            List<AppUser> list = new List<AppUser>() { new AppUser() {Id="1",UserName="User 1" ,ChooseRole="User"},
-                new AppUser() {Id="2",UserName="User 2",ChooseRole="User" },
-                new AppUser() {Id="3",UserName="User 3",ChooseRole="None" },
-                new AppUser() {Id="4",UserName="User 4",ChooseRole="None" },
-                new AppUser() {Id="5",UserName="User 5" ,ChooseRole="User"}
+        //    var mockUserStore = new Mock<IUserStore<AppUser>>();
+        //    var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
 
-            };
-
-            mockUserManager.Setup(m => m.Users).Returns(list.AsQueryable());
-
-            mockUserManager.Setup(m => m.IsInRoleAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => CheckRole(a, b));
-
-            var roleStore = new Mock<IRoleStore<IdentityRole>>();
-            Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
-                         roleStore.Object, null, null, null, null);
-
-            async Task<IdentityRole> GetRole(string role)
-            {
-                return new IdentityRole() { Name = "User", Id = "Id" };
-            }
-
-            roleManager.Setup(r => r.FindByIdAsync(It.IsAny<string>())).Returns<string>((a) => GetRole(a));
-
-            RoleAdminController controller = new RoleAdminController(roleManager.Object, mockUserManager.Object);
-
-            RoleEditModel result = (RoleEditModel)(controller.Edit("Id").Result as ViewResult).Model;
+        //    List<AppUser> list = new List<AppUser>() { new AppUser() {Id="1",UserName="User 1" ,ChooseRole="User"},
+        //        new AppUser() {Id="2",UserName="User 2",ChooseRole="User" },
+        //        new AppUser() {Id="3",UserName="User 3",ChooseRole="None" },
+        //        new AppUser() {Id="4",UserName="User 4",ChooseRole="None" },
+        //        new AppUser() {Id="5",UserName="User 5" ,ChooseRole="User"}
 
 
+        //    };
 
-            Assert.That(result.Members.ToList().Count == 3);
-            Assert.That(result.NonMembers.ToList().Count == 2);
+        //    mockUserManager.Setup(m => m.Users).Returns(list.AsQueryable());
 
-        }
+        //    mockUserManager.Setup(m => m.IsInRoleAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => CheckRole(a, b));
+
+        //    var roleStore = new Mock<IRoleStore<IdentityRole>>();
+        //    Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
+        //                 roleStore.Object, null, null, null, null);
+
+        //    async Task<IdentityRole> GetRole(string role)
+        //    {
+        //        return new IdentityRole() { Name = "User", Id = "Id" };
+        //    }
+
+        //    roleManager.Setup(r => r.FindByIdAsync(It.IsAny<string>())).Returns<string>((a) => GetRole(a));
+
+        //    RoleAdminController controller = new RoleAdminController(roleManager.Object, mockUserManager.Object);
+
+        //    RoleEditModel result = (RoleEditModel)(controller.Edit("Id").Result as ViewResult).Model;
 
 
-        [Test]
-        public void When_Model_Isnt_Valid_Edit_Returns_Model_String()
-        {
 
-            RoleModificationModel model = new RoleModificationModel() { RoleId = "User Role" };
+        //    Assert.That(result.Members.ToList().Count == 3);
+        //    Assert.That(result.NonMembers.ToList().Count == 2);
 
-            var mockUserStore = new Mock<IUserStore<AppUser>>();
-            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+        //}
 
-            var roleStore = new Mock<IRoleStore<IdentityRole>>();
-            Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
-                         roleStore.Object, null, null, null, null);
+
+        //[Test]
+        //public void When_Model_Isnt_Valid_Edit_Returns_Model_String()
+        //{
+
+        //    RoleModificationModel model = new RoleModificationModel() { RoleId = "User Role" };
+
+        //    var mockUserStore = new Mock<IUserStore<AppUser>>();
+        //    var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+        //    var roleStore = new Mock<IRoleStore<IdentityRole>>();
+        //    Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
+        //                 roleStore.Object, null, null, null, null);
 
             
 
-            RoleAdminController controller = new RoleAdminController(roleManager.Object,mockUserManager.Object);
+        //    RoleAdminController controller = new RoleAdminController(roleManager.Object,mockUserManager.Object);
 
-            controller.ModelState.AddModelError("RoleName", "RoleName is required");
+        //    controller.ModelState.AddModelError("RoleName", "RoleName is required");
 
-            var result = controller.Edit(model).Result as OkObjectResult;
+        //    var result = controller.Edit(model).Result as OkObjectResult;
 
 
-            Assert.That(result.Value.ToString() == "User Role");
+        //    Assert.That(result.Value.ToString() == "User Role");
 
-        }
+        //}
 
 
 
@@ -1567,10 +1567,9 @@ namespace Tests
         {
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
-            var userStoreMock = new Mock<IUserStore<AppUser>>();
+           
 
-            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
-                 null, null, null, null, null, null, null, null);
+
 
             async Task<AppUser> FindByEmail(string email)
             {
@@ -1581,7 +1580,9 @@ namespace Tests
             {
                 return new AppUser() { UserName = "User SignOut", Id = "UserId", };
             }
-
+            var userStoreMock = new Mock<IUserStore<AppUser>>();
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                    null, null, null, null, null, null, null, null);
             _mockUserManager.Setup(m => m.FindByEmailAsync(It.IsAny<string>())).Returns<string>((e) => FindByEmail(e));
 
             var contextAccessor = new Mock<IHttpContextAccessor>();
@@ -1602,6 +1603,8 @@ namespace Tests
             }
 
             _mockSignInManager.Setup(s => s.PasswordSignInAsync(It.IsAny<AppUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>())).Returns<AppUser, string, bool, bool>((a, b, c, d) => GetSignInResult(a, b, c, d));
+
+           
 
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
             var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
@@ -1624,7 +1627,210 @@ namespace Tests
 
 
 
+        public class CommentControllerTests
+        {
 
+          [Test]
+          public void DoctorRank_Returns_Model_Count_1()
+            {
+
+                Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
+
+
+                Mock<IRepository> mockRepo = new Mock<IRepository>();
+                DoctorRankViewModel model = new DoctorRankViewModel();
+                List<DoctorRankViewModel> list = new List<DoctorRankViewModel>();
+                list.Add(model);
+                mockRepo.Setup(x => x.GetCommentDetails()).Returns(() => list );
+
+                var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+                var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                     null, null, null, null, null, null, null, null);
+
+
+                CommentController controller = new CommentController(mockRepo.Object,mockUserManager.Object,timeMock.Object);
+
+                List<DoctorRankViewModel> result = (List<DoctorRankViewModel>)(controller.DoctorRank() as ViewResult).Model;
+
+                Assert.That(result.Count() == 1);
+
+
+
+            }
+
+            [Test]
+            public void ShowComments_Returns_Model()
+            {
+
+                Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
+
+                Mock<IRepository> mockRepo = new Mock<IRepository>();
+                DoctorRankViewModel model = new DoctorRankViewModel();
+                List<DoctorRankViewModel> list = new List<DoctorRankViewModel>();
+                list.Add(model);
+
+                ShowCommentsViewModel ShowComments(string Id)
+                {
+                    if(Id=="UserId")
+                    {
+                        return new ShowCommentsViewModel() { };
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+
+                mockRepo.Setup(x => x.GetCommentsAndDoctorData(It.IsAny<string>())).Returns<string>((s) => ShowComments(s));
+
+                var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+                var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                     null, null, null, null, null, null, null, null);
+
+
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
+
+                ShowCommentsViewModel result = (ShowCommentsViewModel)(controller.ShowComments("UserId") as ViewResult).Model;
+
+                Assert.That(result!=null);
+
+
+
+            }
+
+
+
+            [Test]
+            public void AddCommentAndVote_Returns_View()
+            {
+                Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
+
+                Mock<IRepository> mockRepo = new Mock<IRepository>();                        
+                    
+
+                var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+                var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                     null, null, null, null, null, null, null, null);
+
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
+
+                AddVoteCommentViewModel model = new AddVoteCommentViewModel() {Message="Text is Empty" };
+
+                AddVoteCommentViewModel result = (AddVoteCommentViewModel)(controller.AddCommentAndVote(model) as ViewResult).Model;
+
+                Assert.That(result.Message == "Text is Empty");
+
+                
+
+
+            }
+
+            [Test]
+            public void AddCommentAndVote_Returns_View_Error()
+            {
+                Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
+
+                Mock<IRepository> mockRepo = new Mock<IRepository>();
+                mockRepo.Setup(r => r.ChangeComment(It.IsAny<Comment>())).Returns(false);
+
+                var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+                var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                     null, null, null, null, null, null, null, null);
+
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
+
+                AddVoteCommentViewModel model = new AddVoteCommentViewModel() { Message = "Text is Empty" ,Comment=new Comment() {Text="Text" } };
+
+                ViewResult result = controller.AddCommentAndVote(model) as ViewResult;
+
+                Assert.That(result.ViewName == "Error");
+
+
+
+
+
+            }
+
+
+            [Test]
+            public void AddCommentAndVote_Redirects_To_Action()
+            {
+                Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
+                timeMock.Setup(t => t.GetTime()).Returns(new DateTime(2019,11,11));
+
+                Mock<IRepository> mockRepo = new Mock<IRepository>();
+                mockRepo.Setup(r => r.ChangeComment(It.IsAny<Comment>())).Returns(true);
+
+                var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+                var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                     null, null, null, null, null, null, null, null);
+
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
+
+                AddVoteCommentViewModel model = new AddVoteCommentViewModel() { Message = "Text is Empty", Comment = new Comment() { Text = "Text" } };
+
+                RedirectToActionResult result = controller.AddCommentAndVote(model) as RedirectToActionResult;
+
+                Assert.That(result.ActionName == "UsersPanel");
+                Assert.That(result.ControllerName == "Home");
+                                                                                                                   
+
+            }
+
+            [Test]
+            public void AddCommentAndVote_Returns_Model()
+            {
+                Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
+
+                Mock<IRepository> mockRepo = new Mock<IRepository>();
+                mockRepo.Setup(r => r.GetUserByDoctorId(It.IsAny<int>())).Returns<int>((i) => GetUserInt(i).Result);
+
+                CommentData data = new CommentData() {user=new AppUser() {Id="AppUserId",UserName="User1" },   appointment=new Appointment() {AppointmentId=99,AppointmentEnd=new DateTime(2019,11,2) ,Doctor=new Doctor() {DoctorId=2 },DoctorId=2 } };
+
+
+                async Task<AppUser> GetUserInt(int i)
+                {
+                    return new AppUser() { Id = "1", UserName = "Test User",Surname = "Surname", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
+                }
+
+                async Task<AppUser> GetUser()
+                {
+                    return new AppUser() { Id = "1", UserName = "Test User",Surname="Surname", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
+                }
+
+
+                mockRepo.Setup(r => r.CommentAndVoteCheck(It.IsAny<AppUser>())).Returns<AppUser>((u)=>data);
+
+                var userStoreMock = new Mock<IUserStore<AppUser>>();
+
+                var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                     null, null, null, null, null, null, null, null);
+
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object,GetUser);
+
+                AddVoteCommentViewModel model = (AddVoteCommentViewModel)(controller.AddCommentAndVote() as ViewResult).Model;
+
+               
+
+                string compare = "Prosimy o komentarz i ocenę dotyczącą wizyty u Test User Surname z dnia 2019-11-02";
+             
+                
+
+                Assert.That(model.Message == compare);
+
+
+
+            }
+
+
+
+
+        }
 
 
 
