@@ -105,14 +105,24 @@ namespace PogotowieCom.Controllers
 
             UsersAccountViewModel model = new UsersAccountViewModel();
             AppUser user = GetCurrentUserAsync().Result;
-            model.NotificationList = repository.GetNotifications((int)user.PatientId, true);
 
 
-            var data = repository.CommentAndVoteCheck(user);
-            if (data != null)
+            if (user.Patient != null)
             {
-                model.Comment = true;
+                model.NotificationList = repository.GetNotifications((int)user.PatientId, true);
+                var data = repository.CommentAndVoteCheck(user);
+                if (data != null)
+                {
+                    model.Comment = true;
+                }
+
             }
+
+
+
+
+
+
 
 
             return View(model);

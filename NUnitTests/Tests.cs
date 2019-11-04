@@ -11,8 +11,10 @@ using PogotowieCom.Controllers;
 using PogotowieCom.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -408,7 +410,7 @@ namespace Tests
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
-            AdminController controller = new AdminController(mockUserManager.Object,mockRepo.Object);
+            AdminController controller = new AdminController(mockUserManager.Object, mockRepo.Object);
 
             List<AppUser> result = (List<AppUser>)(controller.Delete("Empty").Result as ViewResult).Model;
             ViewResult viewResult = controller.Delete("Empty").Result as ViewResult;
@@ -445,7 +447,7 @@ namespace Tests
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
-            AdminController controller = new AdminController(mockUserManager.Object,mockRepo.Object);
+            AdminController controller = new AdminController(mockUserManager.Object, mockRepo.Object);
 
             RedirectToActionResult Result = controller.Delete("Empty").Result as RedirectToActionResult;
 
@@ -493,14 +495,14 @@ namespace Tests
             var mockUserStore = new Mock<IUserStore<AppUser>>();
             var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
-            mockRepo.Setup(r => r.GetAppointmentById(It.IsAny<int>())).Returns(() => new Appointment() { AppointmentId = 1,AppointmentDate=DateTime.Now,AppointmentStart=new DateTime(2019,10,18,11,00,00),AppointmentEnd= new DateTime(2019, 10, 18, 12, 00, 00), NumberOfPatients=1,PlacesAvailable=5 });
-            mockRepo.Setup(r => r.GetBookedAppointments(It.IsAny<int>())).Returns<int>((a) => new List<int> {2,3,4,5 });
+            mockRepo.Setup(r => r.GetAppointmentById(It.IsAny<int>())).Returns(() => new Appointment() { AppointmentId = 1, AppointmentDate = DateTime.Now, AppointmentStart = new DateTime(2019, 10, 18, 11, 00, 00), AppointmentEnd = new DateTime(2019, 10, 18, 12, 00, 00), NumberOfPatients = 1, PlacesAvailable = 5 });
+            mockRepo.Setup(r => r.GetBookedAppointments(It.IsAny<int>())).Returns<int>((a) => new List<int> { 2, 3, 4, 5 });
 
-            AppUser appUser = new AppUser() {UserName="Check User",Patient=new Patient() {PatientId=1 } };
+            AppUser appUser = new AppUser() { UserName = "Check User", Patient = new Patient() { PatientId = 1 } };
 
             async Task<AppUser> GetUser()
             {
-                return new AppUser() { Id = "1", UserName = "Test User",PatientId=1, Patient = new Patient() { PatientId = 1 } };
+                return new AppUser() { Id = "1", UserName = "Test User", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
             }
 
             AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate(), GetUser);
@@ -542,7 +544,7 @@ namespace Tests
             mockRepo.Setup(r => r.GetPatientById(It.IsAny<int>())).Returns(new Patient() { PatientId = 1 });
             mockRepo.Setup(r => r.AddNotificationToPatient(It.IsAny<int>(), It.IsAny<Notification>())).Returns(true);
             AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate());
-            RedirectToActionResult result = controller.ReserveAppointment(new ReserveAppointmentViewModel() {PatientId=1 }) as RedirectToActionResult;
+            RedirectToActionResult result = controller.ReserveAppointment(new ReserveAppointmentViewModel() { PatientId = 1 }) as RedirectToActionResult;
 
             Assert.That(result.ActionName == "AppointmentDetails");
 
@@ -556,8 +558,8 @@ namespace Tests
             var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
-            
-            mockRepo.Setup(r => r.GetDoctorIdByUserId(It.IsAny<string>())).Returns<string>((a)=>1);
+
+            mockRepo.Setup(r => r.GetDoctorIdByUserId(It.IsAny<string>())).Returns<string>((a) => 1);
 
             Place Place1 = new Place() { PlaceId = 1, PlaceName = "Place 1", City = "City 1", Country = "Poland" };
 
@@ -565,7 +567,7 @@ namespace Tests
 
             List<Appointment> list = new List<Appointment>();
 
-          
+
             list.Add(new Appointment() { AppointmentId = 1, Place = Place1 });
             list.Add(new Appointment() { AppointmentId = 2, Place = Place1 });
             list.Add(new Appointment() { AppointmentId = 3, Place = Place2 });
@@ -577,10 +579,10 @@ namespace Tests
 
             AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate());
 
-            List<Appointment> result=  (List<Appointment>)(controller.ShowAppointments(new ShowAppointmentViewModel() { City = "City 1", Country = "Poland" }) as ViewResult).Model;
+            List<Appointment> result = (List<Appointment>)(controller.ShowAppointments(new ShowAppointmentViewModel() { City = "City 1", Country = "Poland" }) as ViewResult).Model;
 
             Assert.That(result.Count == 4);
-            
+
         }
 
         [Test]
@@ -617,7 +619,7 @@ namespace Tests
 
         }
 
-      
+
 
         [Test]
         public void ShowAppointmentsAdvanced_Returns_List_With_6_Elements()
@@ -657,10 +659,10 @@ namespace Tests
         public void ManageAppointments_Returns_List_With_4_Elements()
         {
 
-           async Task<AppUser> GetUser()
+            async Task<AppUser> GetUser()
             {
                 return new AppUser() { UserName = "User", Doctor = new Doctor() { DoctorId = 1 }, DoctorId = 1 };
-              }
+            }
             var mockUserStore = new Mock<IUserStore<AppUser>>();
             var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
@@ -684,7 +686,7 @@ namespace Tests
 
             mockRepo.Setup(r => r.GetUserAppointments(It.IsAny<int>())).Returns<int>((i) => list);
 
-            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate(), GetUser );
+            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate(), GetUser);
 
             List<Appointment> result = (List<Appointment>)(controller.ManageAppointments() as ViewResult).Model;
 
@@ -705,17 +707,17 @@ namespace Tests
             Mock<IRepository> mockRepo = new Mock<IRepository>();
             mockRepo.Setup(r => r.RemoveAppointment(It.IsAny<int>())).Returns(false);
             Patient patient = new Patient() { PatientId = 2 };
-            PatientAppointment patientAppointment = new PatientAppointment() { AppointmentId = 1, PatientId = 2,Patient=patient };
-            mockRepo.Setup(r => r.GetAppointmentByIdAllData(It.IsAny<int>())).Returns(() => new Appointment() {AppointmentId=1,PatientAppointments=new List<PatientAppointment>() { new PatientAppointment() {PatientId=2,AppointmentId=1 } } });
+            PatientAppointment patientAppointment = new PatientAppointment() { AppointmentId = 1, PatientId = 2, Patient = patient };
+            mockRepo.Setup(r => r.GetAppointmentByIdAllData(It.IsAny<int>())).Returns(() => new Appointment() { AppointmentId = 1, PatientAppointments = new List<PatientAppointment>() { new PatientAppointment() { PatientId = 2, AppointmentId = 1 } } });
             var mockUserStore = new Mock<IUserStore<AppUser>>();
             Mock<UserManager<AppUser>> mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
 
-            AppointmentController controller = new AppointmentController(mockRepo.Object,mockUserManager.Object, new TimeAndDate(), GetUser);
+            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate(), GetUser);
 
             ViewResult result = controller.RemoveAppointment(1) as ViewResult;
 
-            Assert.That(result.ViewName=="Error");
+            Assert.That(result.ViewName == "Error");
         }
 
         [Test]
@@ -729,7 +731,7 @@ namespace Tests
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
             mockRepo.Setup(r => r.RemoveAppointment(It.IsAny<int>())).Returns(true);
-            mockRepo.Setup(r => r.GetPatientById(It.IsAny<int>())).Returns(() => new Patient() {PatientId=2,Notifications=new List<Notification>() { } });
+            mockRepo.Setup(r => r.GetPatientById(It.IsAny<int>())).Returns(() => new Patient() { PatientId = 2, Notifications = new List<Notification>() { } });
             mockRepo.Setup(r => r.AddNotificationToPatient(It.IsAny<int>(), It.IsAny<Notification>())).Returns(true);
             Patient patient = new Patient() { PatientId = 2 };
             PatientAppointment patientAppointment = new PatientAppointment() { AppointmentId = 1, PatientId = 2, Patient = patient };
@@ -777,7 +779,7 @@ namespace Tests
 
             controller.ModelState.AddModelError("Country", "Country is required");
 
-            Place result = (Place)(controller.AddPlace(new Place() {City="Test City" }) as ViewResult).Model;
+            Place result = (Place)(controller.AddPlace(new Place() { City = "Test City" }) as ViewResult).Model;
 
             Assert.That(result.City == "Test City");
 
@@ -843,12 +845,12 @@ namespace Tests
             var mockUserStore = new Mock<IUserStore<AppUser>>();
             Mock<UserManager<AppUser>> mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
-            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object,new TimeAndDate());
-           
+            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate());
+
 
             controller.ModelState.AddModelError("City", "City is required");
 
-            ViewResult result =controller.ShowPlaces(new SelectPlaceViewModel()) as ViewResult;
+            ViewResult result = controller.ShowPlaces(new SelectPlaceViewModel()) as ViewResult;
 
             Assert.That(result.ViewName == "ChoosePlace");
         }
@@ -869,11 +871,11 @@ namespace Tests
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
 
-            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object,new TimeAndDate(), GetUser);
+            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, new TimeAndDate(), GetUser);
 
             AddAppointmentViewModel result = (AddAppointmentViewModel)(controller.AddAppointment(1) as ViewResult).Model;
 
-           Assert.That(result.PlaceId == 1);
+            Assert.That(result.PlaceId == 1);
 
         }
 
@@ -913,7 +915,7 @@ namespace Tests
 
             AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, mockTime.Object);
 
-            RedirectToActionResult result = controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = null, AppointmentStart = new DateTime(2019, 10, 20, 19, 0, 0), AppointmentEnd = new DateTime(2019, 10, 20, 19, 0, 0) } } ) as RedirectToActionResult;
+            RedirectToActionResult result = controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = null, AppointmentStart = new DateTime(2019, 10, 20, 19, 0, 0), AppointmentEnd = new DateTime(2019, 10, 20, 19, 0, 0) } }) as RedirectToActionResult;
 
             Assert.That(result.ActionName == "ManageAppointments");
 
@@ -927,7 +929,7 @@ namespace Tests
 
 
 
-    
+
     public class RoleAdminTests
     {
         //[Test]
@@ -1000,7 +1002,7 @@ namespace Tests
         //    Mock<RoleManager<IdentityRole>> roleManager = new Mock<RoleManager<IdentityRole>>(
         //                 roleStore.Object, null, null, null, null);
 
-            
+
 
         //    RoleAdminController controller = new RoleAdminController(roleManager.Object,mockUserManager.Object);
 
@@ -1027,7 +1029,7 @@ namespace Tests
     {
 
 
-         class IdentityResultMock : SignInResult
+        class IdentityResultMock : SignInResult
         {
             public IdentityResultMock(bool succeeded = false)
             {
@@ -1046,8 +1048,8 @@ namespace Tests
 
             var userStoreMock = new Mock<IUserStore<AppUser>>();
 
-           var  _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
-                null, null, null, null, null, null, null, null);
+            var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
+                 null, null, null, null, null, null, null, null);
 
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
@@ -1057,7 +1059,7 @@ namespace Tests
 
 
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
-            var _mockRoleManager= new Mock<RoleManager<IdentityRole>>(
+            var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
                          roleStore.Object, null, null, null, null);
 
             List<IdentityRole> Roles = new List<IdentityRole>();
@@ -1070,12 +1072,12 @@ namespace Tests
             _mockRoleManager.Setup(r => r.Roles).Returns(() => Roles.AsQueryable());
 
 
-            UserController controller = new UserController(_mockUserManager.Object,_mockSignInManager.Object,_mockRoleManager.Object,mockRepo.Object);
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
 
             var result = (string[])(controller.ChooseRole() as ViewResult).Model;
 
 
-            Assert.That(result.ToList<string>().Count==3);
+            Assert.That(result.ToList<string>().Count == 3);
         }
 
         [Test]
@@ -1119,18 +1121,27 @@ namespace Tests
         public void ManageSpecializations_Returns_Model()
         {
 
-           async Task<AppUser> GetUser()
+            async Task<AppUser> GetUser()
             {
-               return new AppUser() { Id = "User666" };
+                return new AppUser() { Id = "User666" };
             }
 
+          
+
+          
+
+
             Mock<IRepository> mockRepo = new Mock<IRepository>();
-            mockRepo.Setup(m => m.GetDoctorSpecializations(It.IsAny<string>())).Returns(()=>new List<Specialization>() { new Specialization() {Name="Dentysta" } });
-            
+            mockRepo.Setup(m => m.GetDoctorSpecializations(It.IsAny<string>())).Returns(() => new List<Specialization>() { new Specialization() { Name = "Dentysta" } });
+
             var userStoreMock = new Mock<IUserStore<AppUser>>();
 
             var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
                  null, null, null, null, null, null, null, null);
+
+
+          
+
 
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
@@ -1143,13 +1154,13 @@ namespace Tests
             var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
                          roleStore.Object, null, null, null, null);
 
-            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object,GetUser);
+            UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object, GetUser);
 
-           
+
 
             var result = (ManageSpecializationsViewModel)(controller.ManageSpecializations() as ViewResult).Model;
 
-            Assert.That(result.SpecializationName  == "None");
+            Assert.That(result.SpecializationName == "None");
             Assert.That(result.UserId == "User666");
             Assert.That(result.specializations[0].Name == "Dentysta");
 
@@ -1162,10 +1173,10 @@ namespace Tests
         }
 
 
-        [TestCase("Pacjent","PatientView")]
+        [TestCase("Pacjent", "PatientView")]
         [TestCase("Doktor", "DoctorView")]
         [TestCase("None", "Error")]
-        public void Create_Returns_View(string Role,string resultViewName)
+        public void Create_Returns_View(string Role, string resultViewName)
         {
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
@@ -1185,10 +1196,10 @@ namespace Tests
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
             var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
                          roleStore.Object, null, null, null, null);
-    
 
 
-          
+
+
 
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
@@ -1263,12 +1274,12 @@ namespace Tests
 
             IdentityResult identity = Mock.Of<IdentityResult>(i => i.Succeeded == false);
 
-            async Task<IdentityResult> Create(AppUser user,string Password)
+            async Task<IdentityResult> Create(AppUser user, string Password)
             {
                 return identity;
             }
 
-            _mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser,string>( (a,b)=>Create(a,b) );
+            _mockUserManager.Setup(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns<AppUser, string>((a, b) => Create(a, b));
 
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
@@ -1296,7 +1307,7 @@ namespace Tests
         {
             Mock<IRepository> mockRepo = new Mock<IRepository>();
             mockRepo.Setup(r => r.AddPatientToUser(It.IsAny<Patient>(), It.IsAny<string>())).Returns(true);
-            mockRepo.Setup(r => r.AddRoleToUser(It.IsAny<string>(), It.IsAny<string>())).Returns<string,string>((a,b)=>AddRole(a,b));
+            mockRepo.Setup(r => r.AddRoleToUser(It.IsAny<string>(), It.IsAny<string>())).Returns<string, string>((a, b) => AddRole(a, b));
 
             async Task<bool> AddRole(string user, string Password)
             {
@@ -1330,10 +1341,10 @@ namespace Tests
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
 
-            RedirectToActionResult result = controller.CreatePatient(new CreatePatientModel() { Password = "Password", Name = "User", Surname = "Surname User",ChooseRole="Patient" }).Result as RedirectToActionResult;
+            RedirectToActionResult result = controller.CreatePatient(new CreatePatientModel() { Password = "Password", Name = "User", Surname = "Surname User", ChooseRole = "Patient" }).Result as RedirectToActionResult;
 
 
-            Assert.That(result.ActionName=="HomePage");
+            Assert.That(result.ActionName == "HomePage");
 
 
         }
@@ -1373,7 +1384,7 @@ namespace Tests
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
 
-            ViewResult result = controller.CreateDoctor(new CreateDoctorModel() { Password = "Password", Name = "User", Surname = "Surname User",PriceForVisit=100 }).Result as ViewResult;
+            ViewResult result = controller.CreateDoctor(new CreateDoctorModel() { Password = "Password", Name = "User", Surname = "Surname User", PriceForVisit = 100 }).Result as ViewResult;
 
 
             Assert.That(result.ViewName == "DoctorView");
@@ -1458,17 +1469,17 @@ namespace Tests
                          roleStore.Object, null, null, null, null);
 
 
-           async Task<AppUser> GetUser()
+            async Task<AppUser> GetUser()
             {
                 return new AppUser() { DoctorId = 1 };
             }
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object, GetUser);
-                
+
 
             DoctorDetailsViewModel result = (DoctorDetailsViewModel)(controller.AddDoctorDetails(new AppUser()) as ViewResult).Model;
 
-          
+
 
             Assert.That(result.SpecializationList.Count == 3);
             Assert.That(result.DoctorId == 1);
@@ -1483,7 +1494,7 @@ namespace Tests
         }
 
         [Test]
-        public  void AddDoctorDetails_Redirects_To_ManageSpecializations()
+        public void AddDoctorDetails_Redirects_To_ManageSpecializations()
         {
             List<Specialization> GetSpecializations()
             {
@@ -1492,7 +1503,7 @@ namespace Tests
 
 
             Mock<IRepository> mockRepo = new Mock<IRepository>();
-            mockRepo.Setup(r => r.AddSpecializationToDoctor(It.IsAny<int>(),It.IsAny<string>())).Returns(() => true);
+            mockRepo.Setup(r => r.AddSpecializationToDoctor(It.IsAny<int>(), It.IsAny<string>())).Returns(() => true);
 
             var userStoreMock = new Mock<IUserStore<AppUser>>();
 
@@ -1511,17 +1522,17 @@ namespace Tests
                          roleStore.Object, null, null, null, null);
 
 
-           
+
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
 
 
-            RedirectToActionResult result = controller.AddDoctorDetails(new DoctorDetailsViewModel() {DoctorId=1,Specialization=new Specialization() {Name="Spec Name" } }) as RedirectToActionResult;
+            RedirectToActionResult result = controller.AddDoctorDetails(new DoctorDetailsViewModel() { DoctorId = 1, Specialization = new Specialization() { Name = "Spec Name" } }) as RedirectToActionResult;
 
 
 
-            Assert.That(result.ActionName== "ManageSpecializations");
-           
+            Assert.That(result.ActionName == "ManageSpecializations");
+
 
         }
 
@@ -1534,9 +1545,9 @@ namespace Tests
 
             var _mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
                  null, null, null, null, null, null, null, null);
-          
 
-           
+
+
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
 
@@ -1550,10 +1561,10 @@ namespace Tests
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
 
-            LoginModel result = (LoginModel)(controller.Login(new LoginModel() {Email="Email" },"Return Url").Result as ViewResult).Model;
+            LoginModel result = (LoginModel)(controller.Login(new LoginModel() { Email = "Email" }, "Return Url").Result as ViewResult).Model;
 
 
-            Assert.That(result.Email=="Email");
+            Assert.That(result.Email == "Email");
 
 
 
@@ -1567,7 +1578,7 @@ namespace Tests
         {
             Mock<IRepository> mockRepo = new Mock<IRepository>();
 
-           
+
 
 
 
@@ -1593,18 +1604,18 @@ namespace Tests
 
             _mockSignInManager.Setup(s => s.SignOutAsync()).Returns(() => SignOut());
 
-                       
-                               
 
 
-        async Task<Microsoft.AspNetCore.Identity.SignInResult> GetSignInResult(AppUser appuser, string password, bool one, bool two)
+
+
+            async Task<Microsoft.AspNetCore.Identity.SignInResult> GetSignInResult(AppUser appuser, string password, bool one, bool two)
             {
                 return new IdentityResultMock(true);
             }
 
             _mockSignInManager.Setup(s => s.PasswordSignInAsync(It.IsAny<AppUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>())).Returns<AppUser, string, bool, bool>((a, b, c, d) => GetSignInResult(a, b, c, d));
 
-           
+
 
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
             var _mockRoleManager = new Mock<RoleManager<IdentityRole>>(
@@ -1612,12 +1623,12 @@ namespace Tests
 
             UserController controller = new UserController(_mockUserManager.Object, _mockSignInManager.Object, _mockRoleManager.Object, mockRepo.Object);
 
-            RedirectResult result = controller.Login(new LoginModel() { Email = "Email" ,Password="Password"}, "Return Url").Result as RedirectResult;
+            RedirectResult result = controller.Login(new LoginModel() { Email = "Email", Password = "Password" }, "Return Url").Result as RedirectResult;
 
 
 
 
-            Assert.That(result.Url== "Return Url");
+            Assert.That(result.Url == "Return Url");
 
 
 
@@ -1630,8 +1641,8 @@ namespace Tests
         public class CommentControllerTests
         {
 
-          [Test]
-          public void DoctorRank_Returns_Model_Count_1()
+            [Test]
+            public void DoctorRank_Returns_Model_Count_1()
             {
 
                 Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
@@ -1641,7 +1652,7 @@ namespace Tests
                 DoctorRankViewModel model = new DoctorRankViewModel();
                 List<DoctorRankViewModel> list = new List<DoctorRankViewModel>();
                 list.Add(model);
-                mockRepo.Setup(x => x.GetCommentDetails()).Returns(() => list );
+                mockRepo.Setup(x => x.GetCommentDetails()).Returns(() => list);
 
                 var userStoreMock = new Mock<IUserStore<AppUser>>();
 
@@ -1649,7 +1660,7 @@ namespace Tests
                      null, null, null, null, null, null, null, null);
 
 
-                CommentController controller = new CommentController(mockRepo.Object,mockUserManager.Object,timeMock.Object);
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
 
                 List<DoctorRankViewModel> result = (List<DoctorRankViewModel>)(controller.DoctorRank() as ViewResult).Model;
 
@@ -1672,7 +1683,7 @@ namespace Tests
 
                 ShowCommentsViewModel ShowComments(string Id)
                 {
-                    if(Id=="UserId")
+                    if (Id == "UserId")
                     {
                         return new ShowCommentsViewModel() { };
                     }
@@ -1694,7 +1705,7 @@ namespace Tests
 
                 ShowCommentsViewModel result = (ShowCommentsViewModel)(controller.ShowComments("UserId") as ViewResult).Model;
 
-                Assert.That(result!=null);
+                Assert.That(result != null);
 
 
 
@@ -1707,8 +1718,8 @@ namespace Tests
             {
                 Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
 
-                Mock<IRepository> mockRepo = new Mock<IRepository>();                        
-                    
+                Mock<IRepository> mockRepo = new Mock<IRepository>();
+
 
                 var userStoreMock = new Mock<IUserStore<AppUser>>();
 
@@ -1717,13 +1728,13 @@ namespace Tests
 
                 CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
 
-                AddVoteCommentViewModel model = new AddVoteCommentViewModel() {Message="Text is Empty" };
+                AddVoteCommentViewModel model = new AddVoteCommentViewModel() { Message = "Text is Empty" };
 
                 AddVoteCommentViewModel result = (AddVoteCommentViewModel)(controller.AddCommentAndVote(model) as ViewResult).Model;
 
                 Assert.That(result.Message == "Text is Empty");
 
-                
+
 
 
             }
@@ -1743,7 +1754,7 @@ namespace Tests
 
                 CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object);
 
-                AddVoteCommentViewModel model = new AddVoteCommentViewModel() { Message = "Text is Empty" ,Comment=new Comment() {Text="Text" } };
+                AddVoteCommentViewModel model = new AddVoteCommentViewModel() { Message = "Text is Empty", Comment = new Comment() { Text = "Text" } };
 
                 ViewResult result = controller.AddCommentAndVote(model) as ViewResult;
 
@@ -1760,7 +1771,7 @@ namespace Tests
             public void AddCommentAndVote_Redirects_To_Action()
             {
                 Mock<ITimeAndDate> timeMock = new Mock<ITimeAndDate>();
-                timeMock.Setup(t => t.GetTime()).Returns(new DateTime(2019,11,11));
+                timeMock.Setup(t => t.GetTime()).Returns(new DateTime(2019, 11, 11));
 
                 Mock<IRepository> mockRepo = new Mock<IRepository>();
                 mockRepo.Setup(r => r.ChangeComment(It.IsAny<Comment>())).Returns(true);
@@ -1778,7 +1789,7 @@ namespace Tests
 
                 Assert.That(result.ActionName == "UsersPanel");
                 Assert.That(result.ControllerName == "Home");
-                                                                                                                   
+
 
             }
 
@@ -1790,36 +1801,36 @@ namespace Tests
                 Mock<IRepository> mockRepo = new Mock<IRepository>();
                 mockRepo.Setup(r => r.GetUserByDoctorId(It.IsAny<int>())).Returns<int>((i) => GetUserInt(i).Result);
 
-                CommentData data = new CommentData() {user=new AppUser() {Id="AppUserId",UserName="User1" },   appointment=new Appointment() {AppointmentId=99,AppointmentEnd=new DateTime(2019,11,2) ,Doctor=new Doctor() {DoctorId=2 },DoctorId=2 } };
+                CommentData data = new CommentData() { user = new AppUser() { Id = "AppUserId", UserName = "User1" }, appointment = new Appointment() { AppointmentId = 99, AppointmentEnd = new DateTime(2019, 11, 2), Doctor = new Doctor() { DoctorId = 2 }, DoctorId = 2 } };
 
 
                 async Task<AppUser> GetUserInt(int i)
                 {
-                    return new AppUser() { Id = "1", UserName = "Test User",Surname = "Surname", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
+                    return new AppUser() { Id = "1", UserName = "Test User", Surname = "Surname", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
                 }
 
                 async Task<AppUser> GetUser()
                 {
-                    return new AppUser() { Id = "1", UserName = "Test User",Surname="Surname", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
+                    return new AppUser() { Id = "1", UserName = "Test User", Surname = "Surname", PatientId = 1, Patient = new Patient() { PatientId = 1 } };
                 }
 
 
-                mockRepo.Setup(r => r.CommentAndVoteCheck(It.IsAny<AppUser>())).Returns<AppUser>((u)=>data);
+                mockRepo.Setup(r => r.CommentAndVoteCheck(It.IsAny<AppUser>())).Returns<AppUser>((u) => data);
 
                 var userStoreMock = new Mock<IUserStore<AppUser>>();
 
                 var mockUserManager = new Mock<UserManager<AppUser>>(userStoreMock.Object,
                      null, null, null, null, null, null, null, null);
 
-                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object,GetUser);
+                CommentController controller = new CommentController(mockRepo.Object, mockUserManager.Object, timeMock.Object, GetUser);
 
                 AddVoteCommentViewModel model = (AddVoteCommentViewModel)(controller.AddCommentAndVote() as ViewResult).Model;
 
-               
+
 
                 string compare = "Prosimy o komentarz i ocenę dotyczącą wizyty u Test User Surname z dnia 2019-11-02";
-             
-                
+
+
 
                 Assert.That(model.Message == compare);
 

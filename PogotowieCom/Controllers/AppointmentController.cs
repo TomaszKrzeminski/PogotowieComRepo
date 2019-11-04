@@ -227,7 +227,7 @@ namespace PogotowieCom.Controllers
 
 
             DateTime now = time.GetTime();
-            now = now.AddHours(1);
+            
 
             if (model.Appointment.AppointmentDate.HasValue && model.Appointment.AppointmentStart.HasValue && model.Appointment.AppointmentEnd.HasValue)
             {
@@ -238,7 +238,7 @@ namespace PogotowieCom.Controllers
                 }
                 else if (now.Date == model.Appointment.AppointmentDate)
                 {
-
+                    now = now.AddHours(1);
                     int value = DateTime.Compare(model.Appointment.AppointmentStart.Value, now);
 
                     if (value <= 0)

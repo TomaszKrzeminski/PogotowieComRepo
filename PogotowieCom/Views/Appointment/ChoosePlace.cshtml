@@ -94,7 +94,7 @@
 
 <script type="text/javascript">
 
-    alert("Worsk");
+   
    
 
            var frm = $('#SelectPlace');
@@ -103,7 +103,7 @@
                submitHandler: function (form) { // fires only when form is valid
                    // your ajax here
 
-                   alert("Works");
+                 
                    $.ajax({
                        type: frm.attr('method'),
                        url: frm.attr('action'),
@@ -111,19 +111,19 @@
                        success: function (data) {
                            //$.validator.unobtrusive.parse("#SelectPlace");
                            $("#SelectResult").html(data);
-                           alert("Submit");
+                        
                        },
                        error: function (data) {
                            console.log('An error occurred.');
                            console.log(data);
-                           alert("Error");
+                        
                        },
                    });
                    return false;
                }
     });
 
-    alert("Worsk2");
+   
         </script>
 
 

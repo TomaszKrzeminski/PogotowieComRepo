@@ -15,23 +15,33 @@ namespace PogotowieCom.Controllers
         private SignInManager<AppUser> signInManager;
         private RoleManager<IdentityRole> roleManager;
         private IRepository repository;
-        private Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
-        private Func<Task<AppUser>> GetUser;
-        public UserController(UserManager<AppUser> usrMgr, SignInManager<AppUser> signinMgr, RoleManager<IdentityRole> roleMgr, IRepository repo, Func<Task<AppUser>> GetUser = null)
+        public Task<AppUser> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
+         public Func<Task<AppUser>> GetUser;
+
+
+       
+
+
+        public UserController(UserManager<AppUser> usrMgr, SignInManager<AppUser> signinMgr, RoleManager<IdentityRole> roleMgr, IRepository repo, Func<Task<AppUser>> GetUser=null )
         {
+
+            if(GetUser==null)
+            {
+                this.GetUser = GetCurrentUserAsync;
+            }
+            else
+            {
+ this.GetUser = GetUser;
+            }
             userManager = usrMgr;
             signInManager = signinMgr;
             roleManager = roleMgr;
             repository = repo;
 
-            if (GetUser == null)
-            {
-                GetUser = GetCurrentUserAsync;
-            }
-            else
-            {
-                this.GetUser = GetUser;
-            }
+          
+         
+               
+           
 
         }
 
@@ -45,7 +55,8 @@ namespace PogotowieCom.Controllers
         [Authorize]
         public ViewResult Settings()
         {
-            return View("Settings"/*,new ViewResult {Controller=nameof(User),Action=nameof(Settings) }*/);
+           
+            return View("Settings");
         }
 
 
@@ -60,10 +71,41 @@ namespace PogotowieCom.Controllers
         public ViewResult ManageSpecializations()
         {
             AppUser user = GetUser().Result;
+
+           
+           //if(GetUser()==null)
+           // {
+           //     user= userManager.GetUserAsync(HttpContext.User).Result;
+           // }
+           //else
+           // {
+           //     user = GetUser().Result;
+           // }
+
+            //AppUser user = userManager.GetUserAsync(HttpContext.User).Result;
+
             ManageSpecializationsViewModel model = new ManageSpecializationsViewModel() { specializations = repository.GetDoctorSpecializations(user.Id), UserId = user.Id, SpecializationName = "None" };
 
             return View(model);
         }
+
+
+
+        //[Authorize]
+        //public ViewResult ManageSpecializations(string Id)
+        //{
+        //    //AppUser user = GetUser().Result;
+
+        //    Task<AppUser> userAsync = GetUser();
+        //    AppUser user = userAsync.Result;
+
+        //    //AppUser user = userManager.GetUserAsync(HttpContext.User).Result;
+
+        //    ManageSpecializationsViewModel model = new ManageSpecializationsViewModel() { specializations = repository.GetDoctorSpecializations(user.Id), UserId = user.Id, SpecializationName = "None" };
+
+        //    return View(model);
+        //}
+
 
         public ViewResult Create(string Role)
         {
