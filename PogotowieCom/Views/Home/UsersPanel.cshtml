@@ -7,7 +7,7 @@
 
 <div class="container">
 
-    @if(Model.Comment)
+    @if (Model.Comment)
     {
         <div class="row">
             <a asp-controller="Comment" asp-action="AddCommentAndVote" class="btn btn-warning">Prosimy o głos i komentarz po wizycie</a>
@@ -15,26 +15,45 @@
     }
 
 
-<h1>Moje Konto</h1>
+
     <div class="row">
         <div class="col-lg-12">
             <br />
         </div>
     </div>
     <div class="row">
-        <h2>Powiadomienia</h2>
+        <div class="col-lg-12 text-center bg-light">
+            <h1>Powiadomienia</h1>
+        </div>
+        <br />
     </div>
+   
     <div class="row">
 
-        @if (Model.NotificationList!=null&&Model.NotificationList.Count > 0)
+        @if (Model.NotificationList != null && Model.NotificationList.Count > 0)
         {
-            foreach (var item in Model.NotificationList)
+
+        <ol class="bg-transparent">
+
+            @foreach (var item in Model.NotificationList)
             {
-                <p class="col col-lg-12 text-xl-center">@item.NotificationText</p>
+            <li class="col col-lg-12 text-xl-left"><h4 >@item.NotificationText</h4></li>
+            
             }
+
+        </ol>
+
+
+            
         }
 
     </div>
+
+
+
+
+
+
 
 
 </div>

@@ -8,7 +8,7 @@
 {
 <div class="col-lg-12">
     <table class="table-bordered">
-        <thead><tr><th>Nazwisko </th><th>Imię </th><th>Rezerwuj wizytę </th></tr></thead>
+        <thead><tr><th class="col-lg-3">Nazwisko </th><th class="col-lg-3">Imię </th><th class="col-lg-3 text-center">Rezerwuj wizytę </th></tr></thead>
 
 
 
@@ -20,12 +20,12 @@
             <tr>
                 <td>@user.Surname</td>
                 <td>@user.UserName</td>
-                <td>
+                <td class="text-center">
                     <form method="get" asp-action="ShowAppointments" asp-controller="Appointment">
                         <input type="hidden" name="DoctorId" value="@user.Id" />
                         <input type="hidden" name="Country" value="@Model.Country" />
                         <input type="hidden" name="City" value="@Model.City" />
-                        <button class="btn btn-primary" type="submit">Wizyty</button>
+                        <button class="btn btn-danger" type="submit">Rezerwacja</button>
                     </form>
                 </td>
 

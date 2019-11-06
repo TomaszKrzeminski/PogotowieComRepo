@@ -7,29 +7,35 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-lg=12">
+        <div class="col-lg-12 text-center bg-light">
+
             <h1>Specializacje</h1>
         </div>
     </div>
+    <div class="row">
+        <div class="col-lg-12 ">
 
+           <br />
+        </div>
+    </div>
 
     @foreach (var specialization in Model.specializations)
     {
-       
-    <form asp-action="RemoveSpecialization">
-        <div class="row">
-            <div class="col-lg-6">
-                <label class="btn btn-warning " for="SpecializationName">@specialization.Name </label>
+
+        <form asp-action="RemoveSpecialization">
+            <div class="row">
+                <div class="col-lg-6">
+                    <label class="btn btn-primary " for="SpecializationName">@specialization.Name </label>
+                </div>
+                <div class="col-lg-6">
+                    <button class="btn btn-danger " type="submit">Usuń</button>
+                    <input type="hidden" asp-for="UserId" value="@Model.UserId" />
+                    <input type="hidden" asp-for="SpecializationId" value="@specialization.SpecializationId" />
+                    <input type="hidden" asp-for="SpecializationName" value="@specialization.Name" />
+                </div>
             </div>
-            <div class="col-lg-6">
-                <button class="btn btn-danger " type="submit">Usuń</button>
-                <input type="hidden" asp-for="UserId" value="@Model.UserId" />
-                <input type="hidden" asp-for="SpecializationId" value="@specialization.SpecializationId" />
-                <input type="hidden" asp-for="SpecializationName" value="@specialization.Name" />
-            </div>
-        </div>
-    </form>
-        
+        </form>
+
         <br />
 
 
@@ -38,8 +44,8 @@
 
 
     <form asp-action="AddDoctorDetails" method="get">
-        <div class="col-lg-6">
-            <button class="btn btn-outline-dark form-control" type="submit">Dodaj specializacje</button>
+        <div class="col-lg-12">
+            <button class="btn btn-warning" type="submit">Dodaj specializacje</button>
             <input type="hidden" asp-for="UserId" value="@Model.UserId" />
 
         </div>

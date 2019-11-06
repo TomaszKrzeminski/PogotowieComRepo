@@ -4,9 +4,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>DoctorRank</h2>
+
 
 <div class="container">
+    <div class="row">
+        <div class=" col-lg-12 text-center bg-light">
+            <h2>Ranking</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div  >
+           <br />
+        </div>
+    </div>
 
     @if (Model != null && Model.Count > 0)
     {
@@ -27,33 +37,33 @@
             <tbody>
                 @foreach (var doctorRank in Model)
                 {
-                <tr>
-                    <td>@(Model.IndexOf(doctorRank) + 1)</td>
-                    <td>@doctorRank.Points</td>
-                    <td>@doctorRank.Name</td>
-                    <td>@doctorRank.Surname</td>
-                    <td>@doctorRank.specializations.First().Name  </td>
-                    <td>@doctorRank.places.First().City </td>
-                    <td>
-                        <form method="get" asp-action="ShowComments" asp-controller="Comment">
-                            <input type="hidden" name="UserId" value="@doctorRank.UserId" />
-                          
-                            <button class="btn btn-dark" type="submit">@doctorRank.comments.Where(x=>x.Text!="Brak").Count()</button>
-                        </form>
-                    
-                    
-                    </td>
-                    <td>@doctorRank.NearestAppoitmentDate</td>
-                    <td>
-                        <form method="get" asp-action="ShowAppointments" asp-controller="Appointment">
-                            <input type="hidden" name="DoctorId" value="@doctorRank.UserId" />
-                            <input type="hidden" name="Country" value="" />
-                            <input type="hidden" name="City" value="" />
-                            <button class="btn btn-dark" type="submit">@doctorRank.NearestAppoitmentDate</button>
-                        </form>
-                    </td>
+                    <tr>
+                        <td>@(Model.IndexOf(doctorRank) + 1)</td>
+                        <td>@doctorRank.Points</td>
+                        <td>@doctorRank.Name</td>
+                        <td>@doctorRank.Surname</td>
+                        <td>@doctorRank.specializations.First().Name  </td>
+                        <td>@doctorRank.places.First().City </td>
+                        <td>
+                            <form method="get" asp-action="ShowComments" asp-controller="Comment">
+                                <input type="hidden" name="UserId" value="@doctorRank.UserId" />
 
-                </tr>
+                                <button class="btn btn-dark" type="submit">@doctorRank.comments.Where(x => x.Text != "Brak").Count()</button>
+                            </form>
+
+
+                        </td>
+                        @*<td>@doctorRank.NearestAppoitmentDate</td>*@
+                        <td>
+                            <form method="get" asp-action="ShowAppointments" asp-controller="Appointment">
+                                <input type="hidden" name="DoctorId" value="@doctorRank.UserId" />
+                                <input type="hidden" name="Country" value="" />
+                                <input type="hidden" name="City" value="" />
+                                <button class="btn btn-dark" type="submit">@doctorRank.NearestAppoitmentDate</button>
+                            </form>
+                        </td>
+
+                    </tr>
                 }
             </tbody>
 

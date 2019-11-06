@@ -107,9 +107,10 @@ namespace PogotowieCom.Controllers
             AppUser user = GetCurrentUserAsync().Result;
 
 
-            if (user.Patient != null)
+            if (user.PatientId != null)
             {
                 model.NotificationList = repository.GetNotifications((int)user.PatientId, true);
+                model.OrderByDesceding();
                 var data = repository.CommentAndVoteCheck(user);
                 if (data != null)
                 {

@@ -4,18 +4,28 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Wybierz specializacje</h2>
+
 <div class="container">
+    <div class="row">
+        <div  class="col-lg-12  text-center bg-light">
+            <h2>Wybierz specializacje</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <br />
+        </div>
+    </div>
     <form asp-action="AddDoctorDetails" asp-controller="User">
         <div class="row">
             <div class="col-lg-4 form-group ">
 
                 @if (Model.SpecializationList != null)
                 {
-                    <select class="form-control" asp-for="Specialization.Name">
+                    <select class="form-control bg-light " asp-for="Specialization.Name">
                         @foreach (var specialist in Model.SpecializationList)
                         {
-                            <option>@specialist.Name</option>
+                            <option >@specialist.Name</option>
                         }
                     </select>
                 }
@@ -29,7 +39,7 @@
             </div>
         </div>
         <div class="row">
-            <button type="submit">Wybierz</button>
+            <button class="btn btn-warning" type="submit">Wybierz</button>
         </div>
     </form>
 </div>

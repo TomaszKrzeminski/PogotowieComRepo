@@ -9,16 +9,16 @@
 
 <div class="container">
     <div class="row text-center">
-        <div class="col-lg-12">
-            <h2>Wybierz Miejsce Wizyty</h2>
+        <div class="col-lg-12 bg-light">
+            <h2 >Wybierz Miejsce Wizyty</h2>
         </div>
     </div>
 
-    <div>@DateTime.Now</div>
-
+    
     <div class="row">
         <div class="col-lg-12">
-          
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <form id="SelectPlace" asp-action="ShowPlaces" asp-controller="Appointment">
                 <div class="row">
                     <div class="col-lg-4 form-group ">

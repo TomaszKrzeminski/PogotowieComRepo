@@ -96,11 +96,12 @@ namespace PogotowieCom.Controllers
 
             if (String.IsNullOrEmpty(model.Country) && String.IsNullOrEmpty(model.City))
             {
-                 list = repository.GetUserAppointments(DoctorId).OrderByDescending(d=>d.AppointmentDate).ToList();
+                
+                 list = repository.GetUserAppointments(DoctorId).Where(x=>x.AppointmentDate>=time.GetTime()).OrderByDescending(d=>d.AppointmentDate).ToList();
             }
             else
             {
-                 list = repository.GetUserAppointments(DoctorId).Where(a => a.Place.Country == model.Country && a.Place.City == model.City).ToList();
+                 list = repository.GetUserAppointments(DoctorId).Where(a => a.Place.Country == model.Country && a.Place.City == model.City&&a.AppointmentDate>=time.GetTime()).ToList();
             }
 
 
@@ -191,6 +192,27 @@ namespace PogotowieCom.Controllers
 
 
 
+        //[Authorize]
+        //public IActionResult ShowPlaces(SelectPlaceViewModel model)
+        //{
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        List<Place> PlacesList = repository.SelectPlaces(model);
+
+        //        return PartialView(PlacesList);
+        //    }
+        //    else
+        //    {
+        //        List<Place> PlacesList = new List<Place>();
+
+
+        //        return View("ChoosePlace", model);
+        //    }
+
+        //}
+
+
         [Authorize]
         public IActionResult ShowPlaces(SelectPlaceViewModel model)
         {
@@ -203,13 +225,15 @@ namespace PogotowieCom.Controllers
             }
             else
             {
-                List<Place> PlacesList = new List<Place>();
 
+                return View("Empty");
 
-                return View("ChoosePlace", model);
+               
             }
 
         }
+
+
 
         [Authorize(Roles = "Doktor")]
         public IActionResult AddAppointment(int id = 0)
