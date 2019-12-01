@@ -778,7 +778,8 @@ namespace PogotowieCom.Models
 
                 foreach (var doctor in Doctors)
                 {
-                    List<Comment> comments = context.Comments.Where(d => d.DoctorId == doctor.DoctorId).ToList();
+                    //List<Comment> comments = context.Comments.Where(d => d.DoctorId == doctor.DoctorId ).ToList();
+                    List<Comment> comments = context.Comments.Where(d => d.DoctorId == doctor.DoctorId&&d.Done==true).ToList();
                     List<Place> places = context.Appointments.Where(d => d.DoctorId == doctor.DoctorId).Select(p => p.Place).ToList();
                     List<Appointment> appointments = context.Appointments.Where(d =>d.DoctorId==doctor.DoctorId&& d.AppointmentEnd > DateTime.Now).ToList();
 
@@ -897,7 +898,8 @@ namespace PogotowieCom.Models
             try
             {
                 AppUser user = context.Users.Include(d => d.Doctor).Where(u => u.Id == UserId).First();
-                List<Comment> list = context.Comments.Where(c => c.DoctorId == user.DoctorId).ToList();
+                //List<Comment> list = context.Comments.Where(c => c.DoctorId == user.DoctorId).ToList();
+                List<Comment> list = context.Comments.Where(c => c.DoctorId == user.DoctorId&&c.Done==true).ToList();
 
                 model.user = user;
                 model.Comments = list;

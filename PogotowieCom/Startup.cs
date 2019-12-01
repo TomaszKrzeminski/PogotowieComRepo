@@ -33,7 +33,10 @@ namespace PogotowieCom
             services.AddTransient<IRepository, Repository>();
             services.AddTransient<ITimeAndDate, TimeAndDate>();
 
-            services.AddScoped<AppIdentityDbContext>();
+            //services.AddScoped<AppIdentityDbContext>();
+
+            services.AddTransient<AppIdentityDbContext>();
+            services.AddTransient<SeedAll>();
             services.AddDbContext<AppIdentityDbContext>(options =>
                  options.UseSqlServer(
                      Configuration["Data:PogotowieCom:ConnectionString"]));
@@ -46,7 +49,7 @@ namespace PogotowieCom
 
         }
             // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppIdentityDbContext context)
+            public  void Configure(IApplicationBuilder app, IHostingEnvironment env, AppIdentityDbContext context,SeedAll seed)
         {
             app.UseDeveloperExceptionPage();
             app.UseStatusCodePages();
@@ -60,7 +63,8 @@ namespace PogotowieCom
 
            
 
-           Seed.EnsurePopulated(context);
+            seed.EnsurePopulated(context);
+          
         }
     }
 }
