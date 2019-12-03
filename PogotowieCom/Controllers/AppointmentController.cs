@@ -274,6 +274,19 @@ namespace PogotowieCom.Controllers
 
 
                 }
+                else if (repository.CheckIfAppointmentExists(model))
+                {
+
+
+                    ModelState.AddModelError("Appointment.AppointmentStart", "Posiadasz już wizytę w tych godzinach");
+
+                }
+                else if (model.Appointment != null && ((DateTime)model.Appointment.AppointmentStart).Day < ((DateTime)model.Appointment.AppointmentEnd).Day || ((DateTime)model.Appointment.AppointmentStart).Day > ((DateTime)model.Appointment.AppointmentEnd).Day)
+                {
+
+                    ModelState.AddModelError("Appointment.AppointmentStart", "Wizyta może trwać tylko jeden dzień");
+
+                }
 
 
             }
@@ -290,7 +303,7 @@ namespace PogotowieCom.Controllers
             else
             {
 
-                return View(model);
+                return View("AddAppointment", model);
             }
 
 

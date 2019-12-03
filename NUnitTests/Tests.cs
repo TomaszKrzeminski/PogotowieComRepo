@@ -880,7 +880,7 @@ namespace Tests
         }
 
         [Test]
-        public void AddAppointment_Model_State_Is_Valid_Returns_Model()
+        public void AddAppointment_Model_State_Isnt_Valid_Returns_View()
         {
             Mock<ITimeAndDate> mockTime = new Mock<ITimeAndDate>();
             mockTime.Setup(t => t.GetTime()).Returns(() => new DateTime(2019, 10, 21, 10, 0, 0));
@@ -892,9 +892,9 @@ namespace Tests
 
             AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, mockTime.Object);
 
-            AddAppointmentViewModel result = (AddAppointmentViewModel)(controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = new DateTime(2019, 10, 21), AppointmentStart = new DateTime(2019, 10, 20, 11, 0, 0), AppointmentEnd = new DateTime(2019, 10, 20, 12, 0, 0) } }) as ViewResult).Model;
+            ViewResult result = (ViewResult)(controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = new DateTime(2019, 10, 21), AppointmentStart = new DateTime(2019, 10, 20, 11, 0, 0), AppointmentEnd = new DateTime(2019, 10, 20, 12, 0, 0) } }) as ViewResult);
 
-            Assert.That(result.PlaceId == 1);
+            Assert.That(result.ViewName == "AddAppointment");
 
 
 
@@ -903,7 +903,79 @@ namespace Tests
 
 
         [Test]
-        public void AddAppointment_Model_State_Isnt_Valid_Returns_Model()
+        public void AddAppointment_Appointment_lasts_two_days_returns_Model()
+        {
+            Mock<ITimeAndDate> mockTime = new Mock<ITimeAndDate>();
+            mockTime.Setup(t => t.GetTime()).Returns(() => new DateTime(2018, 10, 21, 10, 0, 0));
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+        mockRepo.Setup(r => r.AddAppointment(It.IsAny<AddAppointmentViewModel>())).Returns(false);
+        var mockUserStore = new Mock<IUserStore<AppUser>>();
+        var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+        AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, mockTime.Object);
+
+        ViewResult result = (ViewResult)(controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = new DateTime(2019, 10, 20), AppointmentStart = new DateTime(2019, 10, 20, 11, 0, 0), AppointmentEnd = new DateTime(2019, 10, 21, 12, 0, 0) } }) as ViewResult);
+
+
+            Assert.That(result.ViewName == "AddAppointment");
+            
+
+
+        }
+
+
+        [Test]
+        public void AddAppointment_Time_Of_Reservation_Is_Blocked_Returns_View()
+        {
+            Mock<ITimeAndDate> mockTime = new Mock<ITimeAndDate>();
+            mockTime.Setup(t => t.GetTime()).Returns(() => new DateTime(2018, 10, 21, 10, 0, 0));
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.AddAppointment(It.IsAny<AddAppointmentViewModel>())).Returns(false);
+            mockRepo.Setup(r => r.CheckIfAppointmentExists(It.IsAny<AddAppointmentViewModel>())).Returns(true);
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, mockTime.Object);
+
+            ViewResult result = (ViewResult)(controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = new DateTime(2019, 10, 20), AppointmentStart = new DateTime(2019, 10, 20, 11, 0, 0), AppointmentEnd = new DateTime(2019, 10, 21, 12, 0, 0) } }) as ViewResult);
+
+
+            Assert.That(result.ViewName == "AddAppointment");
+
+
+
+        }
+
+
+        [Test]
+        public void AddAppointment_Time_Of_Reservation_Isnt_Blocked_Redirects()
+        {
+            Mock<ITimeAndDate> mockTime = new Mock<ITimeAndDate>();
+            mockTime.Setup(t => t.GetTime()).Returns(() => new DateTime(2018, 10, 21, 10, 0, 0));
+
+            Mock<IRepository> mockRepo = new Mock<IRepository>();
+            mockRepo.Setup(r => r.AddAppointment(It.IsAny<AddAppointmentViewModel>())).Returns(false);
+            mockRepo.Setup(r => r.CheckIfAppointmentExists(It.IsAny<AddAppointmentViewModel>())).Returns(false);
+            var mockUserStore = new Mock<IUserStore<AppUser>>();
+            var mockUserManager = new Mock<UserManager<AppUser>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+            AppointmentController controller = new AppointmentController(mockRepo.Object, mockUserManager.Object, mockTime.Object);
+
+
+            RedirectToActionResult result = controller.AddAppointment(new AddAppointmentViewModel() { DoctorId = 1, PlaceId = 1, Appointment = new Appointment() { AppointmentDate = null, AppointmentStart = new DateTime(2019, 10, 20, 19, 0, 0), AppointmentEnd = new DateTime(2019, 10, 20, 19, 0, 0) } }) as RedirectToActionResult;
+
+            Assert.That(result.ActionName == "ManageAppointments");
+
+
+
+        }
+
+
+
+        [Test]
+        public void AddAppointment_Model_State_Is_Valid_Redirects()
         {
             Mock<ITimeAndDate> mockTime = new Mock<ITimeAndDate>();
             mockTime.Setup(t => t.GetTime()).Returns(() => new DateTime(2019, 10, 21, 10, 0, 0));

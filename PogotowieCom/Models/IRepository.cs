@@ -24,6 +24,7 @@ namespace PogotowieCom.Models
         bool AddSpecializationToDoctor(int DoctorId, string Name);
         bool AddPlace(Place place);
         bool AddAppointment(AddAppointmentViewModel model);
+        bool CheckIfAppointmentExists(AddAppointmentViewModel model);
         Appointment GetAppointmentById(int Id);
         List<Specialization> GetDoctorSpecializations(string UserId);
         List<Place> SelectPlaces(SelectPlaceViewModel model);
@@ -912,6 +913,93 @@ namespace PogotowieCom.Models
             {
                 return model;
             }
+
+        }
+
+        public bool CheckIfAppointmentExists(AddAppointmentViewModel model)
+        {
+
+
+            Dictionary<int,int> Minuts = new Dictionary<int, int>();
+
+            for (int i = 0; i < 1441; i++)
+            {
+                Minuts.Add(i, 0);
+            }
+                  
+            
+            DateTime day = new DateTime(((DateTime)model.Appointment.AppointmentDate).Year, ((DateTime)model.Appointment.AppointmentDate).Month, ((DateTime)model.Appointment.AppointmentDate).Day, ((DateTime)model.Appointment.AppointmentDate).Hour, 0, 0);
+
+            
+
+
+
+
+            try
+            {
+              List<Appointment> list = context.Appointments.Where(a => a.DoctorId == model.DoctorId && a.AppointmentDate==model.Appointment.AppointmentDate ).ToList();
+
+               
+             if(list!=null)
+                {
+                    foreach (var appointment in list)
+                    {
+
+                        int Start =((DateTime)appointment.AppointmentStart).Hour*60+ (((DateTime)appointment.AppointmentStart).Minute);
+                        int End =((DateTime)appointment.AppointmentEnd).Hour * 60 + (((DateTime)appointment.AppointmentEnd).Minute);
+
+
+                        for (int i = (int)Start; i < ((int)End)+1; i++)
+                        {
+                            Minuts[i] = 1;
+                        }
+                                               
+
+                    }
+
+
+                    int start = ((DateTime)model.Appointment.AppointmentStart).Hour * 60 + (((DateTime)model.Appointment.AppointmentStart).Minute);
+                    int end = ((DateTime)model.Appointment.AppointmentEnd).Hour * 60 + (((DateTime)model.Appointment.AppointmentEnd).Minute);
+
+
+                    for (int i =start ; i < end+1; i++)
+                    {
+
+
+                        if(Minuts[i]==1)
+                        {
+                            return true;
+                        }
+
+
+
+                    }
+
+
+
+                    return false;
+
+                                                                          
+                }
+             else
+                {
+                    return false;
+                }
+
+
+
+
+            }
+            catch(Exception ex)
+            {
+                return true;
+            }
+
+
+
+
+
+
 
         }
     }
